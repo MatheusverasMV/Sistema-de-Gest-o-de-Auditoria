@@ -1,0 +1,51 @@
+<a class="brand" routerLink="/dashboard" aria-label="SGA — ir para o Dashboard">
+  <span class="logo" aria-hidden="true">S</span>
+  @if (!collapsed()) {
+    <span class="brand-text">
+      <span class="brand-name">SGA</span>
+      <span class="brand-sub">Gestão e Automação de Auditoria</span>
+    </span>
+  }
+</a>
+
+<nav aria-label="Navegação principal">
+  @for (section of sections(); track section.title) {
+    <div class="section">
+      @if (!collapsed()) {
+        <h2 class="section-label">{{ section.title }}</h2>
+      } @else {
+        <span class="section-divider" aria-hidden="true"></span>
+      }
+      <ul>
+        @for (item of section.items; track item.link) {
+          <li>
+            <a
+              class="nav-link"
+              [routerLink]="item.link"
+              routerLinkActive="active"
+              ariaCurrentWhenActive="page"
+              [attr.title]="collapsed() ? item.label : null"
+              [attr.aria-label]="collapsed() ? item.label : null"
+            >
+              <sga-icon [name]="item.icon" [size]="18" />
+              @if (!collapsed()) {
+                <span class="nav-label">{{ item.label }}</span>
+                @if (item.requires) {
+                  <sga-icon name="lock" [size]="12" class="restricted" />
+                  <span class="sr-only">(restrito a Sócios)</span>
+                }
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</nav>
+
+@if (!collapsed()) {
+  <footer class="footer">
+    <span class="env-dot" aria-hidden="true"></span>
+    Protótipo v0.1 · dados fictícios
+  </footer>
+}

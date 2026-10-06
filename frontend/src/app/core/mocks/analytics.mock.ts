@@ -1,0 +1,88 @@
+import { LedgerAnalysis } from '../models';
+
+export const LEDGER_ANALYSES: readonly LedgerAnalysis[] = [
+  {
+    engagementId: 'eng-alfa-2026',
+    datasetName: 'Razão 3.1.01 — Receita de vendas (jan–set/2026)',
+    entryCount: 12_489,
+    totalAmount: 18_245_320,
+    exceptionCount: 60,
+    exceptionBreakdown: [
+      { rule: 'Possíveis duplicidades', count: 37 },
+      { rule: 'Lançamentos em fins de semana', count: 14 },
+      { rule: 'Valores redondos acima de R$ 100 mil', count: 9 },
+    ],
+    topEntries: [
+      {
+        document: 'NF 81.204',
+        date: '2026-01-01',
+        account: '3.1.01',
+        description: 'Venda de produtos — Rede Delta Supermercados',
+        amount: 1_284_600,
+      },
+      {
+        document: 'NF 81.467',
+        date: '2026-06-08',
+        account: '3.1.01',
+        description: 'Venda de produtos — Grupo Ômega Varejo',
+        amount: 912_350,
+      },
+      {
+        document: 'NF 81.730',
+        date: '2026-02-15',
+        account: '3.1.01',
+        description: 'Venda de produtos — Comercial Sigma',
+        amount: 786_400,
+        flag: 'Valor redondo',
+      },
+      {
+        document: 'NF 81.993',
+        date: '2026-07-22',
+        account: '3.1.01',
+        description: 'Venda de produtos — Distribuidora Kappa',
+        amount: 655_120,
+      },
+      {
+        document: 'NF 82.256',
+        date: '2026-03-02',
+        account: '3.1.01',
+        description: 'Venda de produtos — Atacadista Lambda',
+        amount: 598_740,
+        flag: 'Fim de semana',
+      },
+      {
+        document: 'NF 82.519',
+        date: '2026-08-09',
+        account: '3.1.01',
+        description: 'Venda de produtos — Mercantil Épsilon',
+        amount: 541_300,
+      },
+      {
+        document: 'NF 82.782',
+        date: '2026-04-16',
+        account: '3.1.01',
+        description: 'Venda de produtos — Rede Delta Supermercados',
+        amount: 487_950,
+        flag: 'Possível duplicidade',
+      },
+      {
+        document: 'NF 83.045',
+        date: '2026-09-23',
+        account: '3.1.01',
+        description: 'Venda de produtos — Grupo Ômega Varejo',
+        amount: 452_800,
+      },
+    ],
+    monthly: [
+      { month: 'jan', amount: 1_812_400, entries: 1_290 },
+      { month: 'fev', amount: 1_754_900, entries: 1_244 },
+      { month: 'mar', amount: 1_968_300, entries: 1_388 },
+      { month: 'abr', amount: 1_902_750, entries: 1_352 },
+      { month: 'mai', amount: 2_041_600, entries: 1_410 },
+      { month: 'jun', amount: 2_186_420, entries: 1_468 },
+      { month: 'jul', amount: 2_097_150, entries: 1_421 },
+      { month: 'ago', amount: 2_140_880, entries: 1_437 },
+      { month: 'set', amount: 2_340_920, entries: 1_479 },
+    ],
+  },
+];

@@ -1,0 +1,123 @@
+<div class="page">
+  <sga-page-header
+    heading="Central de Automações"
+    subheading="Ferramentas de auditoria executáveis de forma avulsa ou dentro de um papel de trabalho."
+  />
+
+  <div class="filters">
+    <div class="chips" role="group" aria-label="Filtrar por categoria">
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="category() === null"
+        (click)="category.set(null)"
+      >
+        Todas <span class="chip-count">{{ automations.value().length }}</span>
+      </button>
+      @for (c of categories; track c) {
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="category() === c"
+          (click)="category.set(c)"
+        >
+          {{ c }} <span class="chip-count">{{ countByCategory().get(c) ?? 0 }}</span>
+        </button>
+      }
+    </div>
+    <sga-search-input label="Buscar automações" placeholder="Buscar automação…" [(value)]="query" />
+  </div>
+
+  @if (automations.isLoading()) {
+    <sga-card><sga-loading-state [rows]="4" /></sga-card>
+  } @else if (automations.error()) {
+    <sga-card
+      ><sga-empty-state
+        heading="Não foi possível carregar o catálogo"
+        icon="circle-alert"
+        tone="danger"
+    /></sga-card>
+  } @else {
+    <ul class="catalog">
+      @for (a of filtered(); track a.id) {
+        <li class="tool">
+          <div class="tool-head">
+            <span class="tool-icon"><sga-icon [name]="a.icon" [size]="20" /></span>
+            <span class="category">{{ a.category }}</span>
+          </div>
+          <h2 class="card-title">{{ a.name }}</h2>
+          <p class="description">{{ a.description }}</p>
+          <dl class="specs">
+            <div>
+              <dt>Entrada</dt>
+              <dd>{{ a.inputs }}</dd>
+            </div>
+            <div>
+              <dt>Tempo estimado</dt>
+              <dd>{{ a.estimatedTime }}</dd>
+            </div>
+          </dl>
+          <div class="tool-foot">
+            @if (!a.available) {
+              <span class="meta soon">Fluxo previsto para a v0.2</span>
+            }
+            <a
+              sgaButton
+              [variant]="a.available ? 'primary' : 'secondary'"
+              size="sm"
+              icon="play"
+              [routerLink]="['/automations', a.id]"
+            >
+              Executar
+            </a>
+          </div>
+        </li>
+      } @empty {
+        <li class="empty">
+          <sga-empty-state
+            heading="Nenhuma automação encontrada"
+            description="Tente outra categoria ou termo de busca."
+            icon="search"
+            [compact]="true"
+          />
+        </li>
+      }
+    </ul>
+  }
+
+  <sga-card
+    heading="Execuções recentes"
+    subheading="Histórico de execuções da equipe"
+    [flush]="true"
+  >
+    <sga-data-table
+      caption="Execuções recentes"
+      [columns]="executionColumns"
+      [rows]="executions.value()"
+      [loading]="executions.isLoading()"
+    >
+      <ng-template sgaCell="id" [sgaCellOf]="executions.value()" let-row
+        ><span class="mono">{{ row.id }}</span></ng-template
+      >
+      <ng-template sgaCell="workpaper" [sgaCellOf]="executions.value()" let-row>
+        @if (row.workpaperId) {
+          <a [routerLink]="['/workpapers', row.workpaperId]">{{ row.workpaperId }}</a>
+        } @else {
+          <span class="meta">Não vinculada</span>
+        }
+      </ng-template>
+      <ng-template sgaCell="executedBy" [sgaCellOf]="executions.value()" let-row
+        ><sga-person [userId]="row.executedById"
+      /></ng-template>
+      <ng-template sgaCell="when" [sgaCellOf]="executions.value()" let-row
+        ><span class="meta">{{ row.executedAt | relativeTime }}</span></ng-template
+      >
+      <ng-template sgaCell="status" [sgaCellOf]="executions.value()" let-row>
+        <sga-status-badge
+          [label]="executionStatus[row.status].label"
+          [tone]="executionStatus[row.status].tone"
+        />
+      </ng-template>
+    </sga-data-table>
+  </sga-card>
+</div>

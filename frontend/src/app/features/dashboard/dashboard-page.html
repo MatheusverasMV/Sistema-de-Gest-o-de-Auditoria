@@ -1,0 +1,225 @@
+<div class="page">
+  <sga-page-header
+    [heading]="'Olá, ' + firstName()"
+    [subheading]="'Visão consolidada dos trabalhos · ' + today"
+  >
+    <a header-actions sgaButton variant="secondary" icon="square-kanban" routerLink="/workflow"
+      >Fluxo de Trabalho</a
+    >
+    <a header-actions sgaButton variant="primary" icon="briefcase" routerLink="/engagements"
+      >Ver trabalhos</a
+    >
+  </sga-page-header>
+
+  @if (summary.error()) {
+    <sga-card>
+      <sga-empty-state
+        heading="Não foi possível carregar o dashboard"
+        description="Verifique a conexão e tente novamente."
+        icon="circle-alert"
+        tone="danger"
+      >
+        <button sgaButton type="button" icon="rotate-ccw" (click)="summary.reload()">
+          Tentar novamente
+        </button>
+      </sga-empty-state>
+    </sga-card>
+  } @else {
+    @let data = summary.value();
+    <section class="grid-kpi" aria-label="Indicadores">
+      <sga-kpi-card
+        label="Trabalhos ativos"
+        icon="briefcase"
+        [loading]="!data"
+        [value]="data?.kpis?.activeEngagements ?? ''"
+        hint="Em planejamento, execução ou revisão"
+      />
+      <sga-kpi-card
+        label="PTAs em aberto"
+        icon="file-text"
+        [loading]="!data"
+        [value]="data?.kpis?.openWorkpapers ?? ''"
+        hint="Ainda não finalizados"
+      />
+      <sga-kpi-card
+        label="Aguardando revisão"
+        icon="hourglass"
+        tone="warning"
+        [loading]="!data"
+        [value]="data?.kpis?.awaitingReview ?? ''"
+        hint="Na fila dos revisores"
+      />
+      <sga-kpi-card
+        label="Pendências críticas"
+        icon="triangle-alert"
+        tone="danger"
+        [loading]="!data"
+        [value]="data?.kpis?.criticalIssues ?? ''"
+        hint="Exceções altas e PTAs com pendência"
+      />
+    </section>
+
+    <div class="layout">
+      <div class="main-col">
+        <sga-card
+          heading="Progresso dos trabalhos"
+          subheading="Trabalhos ativos ordenados pelo prazo do relatório"
+          [flush]="true"
+        >
+          <a
+            card-actions
+            sgaButton
+            variant="ghost"
+            size="sm"
+            trailingIcon="arrow-right"
+            routerLink="/engagements"
+            >Todos</a
+          >
+          @if (!data) {
+            <sga-loading-state [rows]="3" />
+          } @else {
+            <ul class="rows">
+              @for (eng of data.engagements; track eng.id) {
+                <li>
+                  <a class="row engagement-row" [routerLink]="['/engagements', eng.id]">
+                    <span class="eng-main">
+                      <span class="strong">{{ eng.client }}</span>
+                      <span class="meta">{{ eng.title }}</span>
+                    </span>
+                    <sga-status-badge
+                      [label]="engagementStatus[eng.status].label"
+                      [tone]="engagementStatus[eng.status].tone"
+                    />
+                    <sga-progress-bar
+                      class="eng-progress"
+                      [value]="eng.progress"
+                      [label]="'Progresso de ' + eng.client"
+                    />
+                    <span class="meta eng-due"
+                      >Relatório {{ eng.reportDueDate | calendarDate }}</span
+                    >
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </sga-card>
+
+        <sga-card
+          heading="Minhas tarefas"
+          [subheading]="data ? data.myTasks.length + ' em aberto' : ''"
+          [flush]="true"
+        >
+          <a
+            card-actions
+            sgaButton
+            variant="ghost"
+            size="sm"
+            trailingIcon="arrow-right"
+            routerLink="/tasks"
+            >Ver todas</a
+          >
+          @if (!data) {
+            <sga-loading-state [rows]="3" />
+          } @else {
+            <ul class="rows">
+              @for (task of data.myTasks.slice(0, 5); track task.id) {
+                <li class="row task-row">
+                  <span class="task-main">
+                    @if (task.workpaperId) {
+                      <a [routerLink]="['/workpapers', task.workpaperId]">{{ task.title }}</a>
+                    } @else {
+                      <span>{{ task.title }}</span>
+                    }
+                    <span class="meta"
+                      >{{ task.client }}{{ task.workpaperId ? ' · ' + task.workpaperId : '' }}</span
+                    >
+                  </span>
+                  <sga-status-badge
+                    [label]="priority[task.priority].label"
+                    [tone]="priority[task.priority].tone"
+                  />
+                  <span class="due" [class.overdue]="isOverdue(task.dueDate)">
+                    <sga-icon name="calendar-clock" [size]="14" />
+                    {{ task.dueDate | calendarDate }}
+                    @if (isOverdue(task.dueDate)) {
+                      <span class="overdue-label">atrasada</span>
+                    }
+                  </span>
+                </li>
+              } @empty {
+                <li>
+                  <sga-empty-state
+                    heading="Nenhuma tarefa em aberto"
+                    description="Você está em dia com suas atribuições."
+                    icon="circle-check"
+                    [compact]="true"
+                  />
+                </li>
+              }
+            </ul>
+          }
+        </sga-card>
+      </div>
+
+      <div class="side-col">
+        <sga-card heading="Atividade recente" [flush]="true">
+          @if (!data) {
+            <sga-loading-state [rows]="4" />
+          } @else {
+            <ul class="feed">
+              @for (item of data.activities; track item.id) {
+                <li>
+                  <sga-avatar [name]="people.nameOf(item.actorId)" [size]="28" />
+                  <p>
+                    <span class="strong">{{ people.nameOf(item.actorId) }}</span>
+                    {{ item.action }}
+                    @if (item.link) {
+                      <a [routerLink]="item.link">{{ item.target }}</a>
+                    } @else {
+                      {{ item.target }}
+                    }
+                    <span class="meta block">{{ item.at | relativeTime }}</span>
+                  </p>
+                </li>
+              }
+            </ul>
+          }
+        </sga-card>
+
+        <sga-card heading="Automações recentes" [flush]="true">
+          <a
+            card-actions
+            sgaButton
+            variant="ghost"
+            size="sm"
+            trailingIcon="arrow-right"
+            routerLink="/automations"
+            >Central</a
+          >
+          @if (!data) {
+            <sga-loading-state [rows]="3" />
+          } @else {
+            <ul class="rows">
+              @for (exec of data.executions; track exec.id) {
+                <li class="row exec-row">
+                  <span class="exec-icon"
+                    ><sga-icon [name]="exec.automation?.icon ?? 'zap'" [size]="16"
+                  /></span>
+                  <span class="exec-main">
+                    <span class="strong">{{ exec.automation?.name }}</span>
+                    <span class="meta">{{ exec.client }} · {{ exec.summary }}</span>
+                  </span>
+                  <sga-status-badge
+                    [label]="executionStatus[exec.status].label"
+                    [tone]="executionStatus[exec.status].tone"
+                  />
+                </li>
+              }
+            </ul>
+          }
+        </sga-card>
+      </div>
+    </div>
+  }
+</div>

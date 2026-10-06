@@ -1,0 +1,109 @@
+<button
+  sgaIconButton
+  type="button"
+  icon="panel-left"
+  label="Recolher ou expandir menu"
+  (click)="toggleSidebar.emit()"
+></button>
+
+<form class="search" role="search" (ngSubmit)="search()">
+  <sga-icon name="search" [size]="16" class="search-icon" />
+  <input
+    sgaInput
+    type="search"
+    name="q"
+    aria-label="Buscar papéis de trabalho"
+    placeholder="Buscar PTAs, clientes, áreas…"
+    [(ngModel)]="query"
+  />
+</form>
+
+<div class="right">
+  <button
+    type="button"
+    class="notif-trigger"
+    [cdkMenuTriggerFor]="notifMenu"
+    [attr.aria-label]="'Notificações' + (unreadCount() ? ', ' + unreadCount() + ' não lidas' : '')"
+    title="Notificações"
+  >
+    <sga-icon name="bell" [size]="18" />
+    @if (unreadCount()) {
+      <span class="notif-dot" aria-hidden="true">{{ unreadCount() }}</span>
+    }
+  </button>
+
+  <span class="divider" aria-hidden="true"></span>
+
+  @if (user(); as current) {
+    <button
+      type="button"
+      class="user-trigger"
+      [cdkMenuTriggerFor]="userMenu"
+      aria-label="Menu do usuário e troca de persona"
+    >
+      <sga-avatar [name]="current.name" [size]="34" />
+      <span class="user-text">
+        <span class="user-name">{{ current.name }}</span>
+        <span class="user-role">{{ roleLabel(current) }}</span>
+      </span>
+      <sga-icon name="chevron-down" [size]="16" class="chevron" />
+    </button>
+  }
+</div>
+
+<ng-template #notifMenu>
+  <div class="sga-menu notif-menu" cdkMenu>
+    <div class="sga-menu__label">Notificações</div>
+    @for (n of notifications.value(); track n.id) {
+      <button
+        type="button"
+        class="sga-menu__item notif-item"
+        cdkMenuItem
+        (cdkMenuItemTriggered)="openNotification(n.link)"
+      >
+        <span class="unread-dot" [class.visible]="n.unread" aria-hidden="true"></span>
+        <span class="notif-text">
+          <span>{{ n.text }}</span>
+          <span class="meta">{{ n.at | relativeTime }}{{ n.unread ? ' · não lida' : '' }}</span>
+        </span>
+      </button>
+    } @empty {
+      <p class="meta empty">Nenhuma notificação.</p>
+    }
+  </div>
+</ng-template>
+
+<ng-template #userMenu>
+  <div class="sga-menu persona-menu" cdkMenu>
+    @if (user(); as current) {
+      <div class="menu-user">
+        <span class="user-name">{{ current.name }}</span>
+        <span class="meta">{{ current.email }}</span>
+      </div>
+      <div class="sga-menu__divider"></div>
+    }
+    <div class="sga-menu__label">Persona de demonstração</div>
+    <div cdkMenuGroup>
+      @for (persona of personas(); track persona.id) {
+        <button
+          type="button"
+          class="sga-menu__item"
+          cdkMenuItemRadio
+          [cdkMenuItemChecked]="persona.id === user()?.id"
+          (cdkMenuItemTriggered)="switchPersona(persona)"
+        >
+          <sga-avatar [name]="persona.name" [size]="26" />
+          <span class="persona-text">
+            <span>{{ persona.name }}</span>
+            <span class="meta">{{ roleLabel(persona) }}</span>
+          </span>
+          @if (persona.id === user()?.id) {
+            <sga-icon name="check" [size]="16" class="check" />
+          }
+        </button>
+      }
+    </div>
+    <div class="sga-menu__divider"></div>
+    <p class="menu-note meta">Sessão simulada — sem autenticação real.</p>
+  </div>
+</ng-template>

@@ -1,0 +1,312 @@
+@if (data.isLoading() && !data.value()) {
+  <sga-card><sga-loading-state [rows]="8" label="Carregando papel de trabalho…" /></sga-card>
+} @else if (data.error()) {
+  <sga-card>
+    <sga-empty-state heading="Não foi possível carregar o PTA" icon="circle-alert" tone="danger">
+      <button sgaButton type="button" icon="rotate-ccw" (click)="data.reload()">
+        Tentar novamente
+      </button>
+    </sga-empty-state>
+  </sga-card>
+} @else if (workpaper(); as wp) {
+  <div class="page">
+    <sga-page-header
+      [heading]="wp.area"
+      [subheading]="
+        (engagement()?.client ?? '') +
+        ' · Auditoria ' +
+        (engagement()?.fiscalYear ?? '') +
+        ' · ' +
+        wp.title
+      "
+      [breadcrumb]="breadcrumb()"
+    >
+      <span header-badge class="code-chip mono">{{ wp.id }}</span>
+      <sga-status-badge
+        header-badge
+        [label]="statusMeta[wp.status].label"
+        [tone]="statusMeta[wp.status].tone"
+      />
+
+      @if (automationProcedure(); as proc) {
+        <a
+          header-actions
+          sgaButton
+          variant="secondary"
+          icon="shuffle"
+          [routerLink]="['/automations', proc.automationId]"
+          [queryParams]="{ workpaperId: wp.id }"
+        >
+          Executar Seleção de Amostras
+        </a>
+      }
+      <button
+        header-actions
+        sgaButton
+        variant="primary"
+        icon="send"
+        type="button"
+        [disabled]="!canSubmit()"
+        (click)="submitOpen.set(true)"
+      >
+        Enviar para revisão
+      </button>
+    </sga-page-header>
+
+    <dl class="meta-strip">
+      <div>
+        <dt>Preparado por</dt>
+        <dd><sga-person [userId]="wp.preparerId" [showRole]="true" /></dd>
+      </div>
+      <div>
+        <dt>Revisado por</dt>
+        <dd><sga-person [userId]="wp.reviewerId" [showRole]="true" /></dd>
+      </div>
+      <div>
+        <dt>Data</dt>
+        <dd class="mono">{{ wp.date | calendarDate }}</dd>
+      </div>
+      <div>
+        <dt>Status</dt>
+        <dd>{{ statusMeta[wp.status].label }}</dd>
+      </div>
+      <div>
+        <dt>Última alteração</dt>
+        <dd>{{ wp.updatedAt | relativeTime }}</dd>
+      </div>
+    </dl>
+
+    <sga-card>
+      <sga-workpaper-status-flow [status]="wp.status" />
+    </sga-card>
+
+    <div class="layout">
+      <div class="sections">
+        <section id="objetivo" class="block">
+          <h2 class="block-title"><span class="num">1</span>Objetivo</h2>
+          <p>{{ wp.objective }}</p>
+        </section>
+
+        <section id="base" class="block">
+          <h2 class="block-title"><span class="num">2</span>Base utilizada</h2>
+          <ul class="basis">
+            @for (item of wp.basis; track item) {
+              <li><sga-icon name="database" [size]="16" />{{ item }}</li>
+            }
+          </ul>
+        </section>
+
+        <section id="procedimentos" class="block">
+          <h2 class="block-title">
+            <span class="num">3</span>Procedimentos
+            <span class="meta title-meta"
+              >{{ proceduresDone() }} de {{ wp.procedures.length }} concluídos</span
+            >
+          </h2>
+          <ol class="procedures">
+            @for (proc of wp.procedures; track proc.id) {
+              <li [class.done]="proc.done">
+                <span
+                  class="check"
+                  [attr.aria-label]="proc.done ? 'Concluído' : 'Pendente'"
+                  role="img"
+                >
+                  <sga-icon [name]="proc.done ? 'circle-check' : 'circle-alert'" [size]="18" />
+                </span>
+                <span class="proc-id mono">{{ proc.id }}</span>
+                <span class="proc-text">{{ proc.description }}</span>
+                @if (proc.automationId && !proc.done) {
+                  <a
+                    sgaButton
+                    size="sm"
+                    variant="primary"
+                    icon="zap"
+                    [routerLink]="['/automations', proc.automationId]"
+                    [queryParams]="{ workpaperId: wp.id }"
+                  >
+                    Executar automação
+                  </a>
+                } @else if (proc.automationId) {
+                  <span class="meta auto-tag"
+                    ><sga-icon name="zap" [size]="14" />Via automação</span
+                  >
+                }
+              </li>
+            }
+          </ol>
+        </section>
+
+        <section id="resultados" class="block">
+          <h2 class="block-title"><span class="num">4</span>Resultados</h2>
+          <p>{{ wp.results }}</p>
+        </section>
+
+        <section id="excecoes" class="block">
+          <h2 class="block-title"><span class="num">5</span>Exceções</h2>
+          @for (ex of wp.exceptions; track ex.id) {
+            <div class="exception" [class.resolved]="ex.resolved">
+              <span class="mono strong">{{ ex.id }}</span>
+              <span class="ex-text">{{ ex.description }}</span>
+              <span class="mono">{{ ex.amount | currency: 'BRL' }}</span>
+              @if (ex.resolved) {
+                <sga-status-badge label="Resolvida" tone="success" />
+              } @else {
+                <sga-status-badge
+                  [label]="'Severidade ' + severity[ex.severity].label.toLowerCase()"
+                  [tone]="severity[ex.severity].tone"
+                />
+              }
+            </div>
+          } @empty {
+            <p class="text-secondary">Nenhuma exceção identificada.</p>
+          }
+        </section>
+
+        <section id="evidencias" class="block">
+          <h2 class="block-title">
+            <span class="num">6</span>Evidências
+            <span class="meta title-meta">{{ wp.evidences.length }} anexadas</span>
+          </h2>
+          <ul class="evidences">
+            @for (ev of wp.evidences; track ev.id) {
+              <li [class.highlight]="ev.id === highlight()">
+                <span class="ev-icon" [class.auto]="ev.kind === 'automation'">
+                  <sga-icon [name]="ev.kind === 'automation' ? 'zap' : 'paperclip'" [size]="16" />
+                </span>
+                <span class="ev-text">
+                  <span class="ev-name">
+                    {{ ev.name }}
+                    @if (ev.id === highlight()) {
+                      <sga-status-badge label="Recém-vinculada" tone="success" />
+                    }
+                  </span>
+                  <span class="meta">
+                    {{ ev.kind === 'automation' ? 'Resultado de automação' : 'Arquivo' }}
+                    · {{ people.nameOf(ev.addedById) }} · {{ ev.addedAt | relativeTime }}
+                    @if (ev.description) {
+                      · {{ ev.description }}
+                    }
+                  </span>
+                </span>
+              </li>
+            } @empty {
+              <li class="text-secondary">Nenhuma evidência anexada.</li>
+            }
+          </ul>
+        </section>
+
+        <section id="conclusao" class="block">
+          <h2 class="block-title"><span class="num">7</span>Conclusão</h2>
+          @if (wp.conclusion) {
+            <p>{{ wp.conclusion }}</p>
+          } @else {
+            <p class="text-secondary pending">
+              <sga-icon name="clock" [size]="16" />
+              Em elaboração — a conclusão depende dos testes de detalhe pendentes.
+            </p>
+          }
+        </section>
+      </div>
+
+      <aside class="side">
+        <sga-card heading="Revisão" [subheading]="openNotes() + ' ponto(s) em aberto'">
+          <div id="revisao" class="reviewer">
+            <span class="meta">Revisor</span>
+            <sga-person [userId]="wp.reviewerId" [showRole]="true" [size]="28" />
+          </div>
+          <ul class="notes">
+            @for (note of wp.reviewNotes; track note.id) {
+              <li [class.resolved]="note.resolved">
+                <div class="note-head">
+                  <span class="strong">{{ people.nameOf(note.authorId) }}</span>
+                  <span class="meta">{{ note.date | relativeTime }}</span>
+                </div>
+                <p>{{ note.text }}</p>
+                <sga-status-badge
+                  [label]="note.resolved ? 'Resolvido' : 'Em aberto'"
+                  [tone]="note.resolved ? 'success' : 'warning'"
+                />
+              </li>
+            } @empty {
+              <li class="meta">Nenhum ponto de revisão registrado.</li>
+            }
+          </ul>
+        </sga-card>
+
+        <sga-card heading="Nesta página">
+          <sga-progress-bar
+            [value]="(proceduresDone() / (wp.procedures.length || 1)) * 100"
+            label="Procedimentos concluídos"
+          />
+          <nav aria-label="Seções do PTA" class="toc">
+            @for (s of sections; track s.id) {
+              <a [routerLink]="[]" [fragment]="s.id" queryParamsHandling="preserve">{{
+                s.label
+              }}</a>
+            }
+          </nav>
+        </sga-card>
+      </aside>
+    </div>
+  </div>
+
+  <sga-drawer
+    heading="Enviar para revisão"
+    [subheading]="wp.id + ' · ' + wp.area"
+    [(open)]="submitOpen"
+    [width]="460"
+  >
+    <p class="drawer-intro">
+      O PTA seguirá para <strong>Aguardando revisão</strong> e ficará disponível na fila de
+      {{ people.nameOf(wp.reviewerId) }}.
+    </p>
+    <ul class="checklist">
+      <li [class.ok]="proceduresDone() === wp.procedures.length">
+        <sga-icon
+          [name]="proceduresDone() === wp.procedures.length ? 'circle-check' : 'circle-alert'"
+          [size]="18"
+        />
+        Procedimentos concluídos
+        <span class="meta">{{ proceduresDone() }} de {{ wp.procedures.length }}</span>
+      </li>
+      <li [class.ok]="wp.evidences.length > 0">
+        <sga-icon [name]="wp.evidences.length ? 'circle-check' : 'circle-alert'" [size]="18" />
+        Evidências anexadas <span class="meta">{{ wp.evidences.length }}</span>
+      </li>
+      <li [class.ok]="openNotes() === 0">
+        <sga-icon [name]="openNotes() === 0 ? 'circle-check' : 'circle-alert'" [size]="18" />
+        Pontos de revisão em aberto <span class="meta">{{ openNotes() }}</span>
+      </li>
+    </ul>
+    @if (proceduresDone() < wp.procedures.length) {
+      <p class="meta warn">
+        Há procedimentos pendentes. O revisor verá esse status ao abrir o PTA.
+      </p>
+    }
+    <button drawer-footer sgaButton variant="ghost" type="button" (click)="submitOpen.set(false)">
+      Cancelar
+    </button>
+    <button
+      drawer-footer
+      sgaButton
+      variant="primary"
+      icon="send"
+      type="button"
+      [loading]="submitting()"
+      [disabled]="submitting()"
+      (click)="submitForReview()"
+    >
+      Confirmar envio
+    </button>
+  </sga-drawer>
+} @else {
+  <sga-card>
+    <sga-empty-state
+      heading="PTA não encontrado"
+      description="O papel de trabalho solicitado não existe."
+      icon="file-text"
+    >
+      <a sgaButton variant="primary" routerLink="/workpapers">Ver papéis de trabalho</a>
+    </sga-empty-state>
+  </sga-card>
+}

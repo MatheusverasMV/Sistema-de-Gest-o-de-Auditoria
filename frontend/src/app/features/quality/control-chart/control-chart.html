@@ -1,0 +1,178 @@
+<div
+  class="chart"
+  tabindex="0"
+  role="group"
+  [attr.aria-label]="label() + '. Use as setas para percorrer os períodos.'"
+  (keydown)="onKeydown($event)"
+  (mouseleave)="hovered.set(null)"
+  (blur)="hovered.set(null)"
+>
+  <svg
+    [attr.width]="width()"
+    [attr.height]="height"
+    [attr.viewBox]="'0 0 ' + width() + ' ' + height"
+    aria-hidden="true"
+  >
+    <!-- Grade e eixo Y -->
+    @for (tick of yTicks(); track tick) {
+      <line
+        class="grid"
+        [attr.x1]="margin.left"
+        [attr.x2]="width() - margin.right"
+        [attr.y1]="y(tick)"
+        [attr.y2]="y(tick)"
+      />
+      <text
+        class="axis"
+        [attr.x]="margin.left - 8"
+        [attr.y]="y(tick)"
+        text-anchor="end"
+        dominant-baseline="middle"
+      >
+        {{ format()(tick) }}
+      </text>
+    }
+
+    <!-- Limites e linha central -->
+    <path class="limit" [attr.d]="uclPath()" />
+    @if (hasLcl()) {
+      <path class="limit" [attr.d]="lclPath()" />
+    }
+    <line
+      class="center"
+      [attr.x1]="margin.left"
+      [attr.x2]="width() - margin.right"
+      [attr.y1]="centerY()"
+      [attr.y2]="centerY()"
+    />
+
+    <text
+      class="limit-label"
+      [attr.x]="width() - margin.right + 8"
+      [attr.y]="y(lastUcl())"
+      dominant-baseline="middle"
+    >
+      LSC {{ format()(lastUcl()) }}
+    </text>
+    <text
+      class="limit-label strong"
+      [attr.x]="width() - margin.right + 8"
+      [attr.y]="centerY()"
+      dominant-baseline="middle"
+    >
+      LC {{ format()(data().center) }}
+    </text>
+    <text
+      class="limit-label"
+      [attr.x]="width() - margin.right + 8"
+      [attr.y]="y(lastLcl())"
+      dominant-baseline="middle"
+    >
+      LIC {{ format()(lastLcl()) }}
+    </text>
+
+    <!-- Crosshair -->
+    @if (active(); as a) {
+      <line
+        class="crosshair"
+        [attr.x1]="a.x"
+        [attr.x2]="a.x"
+        [attr.y1]="margin.top"
+        [attr.y2]="height - margin.bottom"
+      />
+    }
+
+    <!-- Série -->
+    <path class="series" [attr.d]="linePath()" />
+    @for (p of plot(); track p.label; let i = $index) {
+      <circle
+        [class]="p.outOfControl ? 'point point--signal' : 'point'"
+        [attr.cx]="p.x"
+        [attr.cy]="p.y"
+        [attr.r]="p.outOfControl || hovered() === i ? 5.5 : 4"
+      />
+      @if (p.outOfControl) {
+        <text class="signal-label" [attr.x]="p.x" [attr.y]="p.y - 12" text-anchor="middle">
+          {{ format()(p.value) }}
+        </text>
+      }
+      @if (i % xLabelEvery() === 0) {
+        <text
+          class="axis"
+          [attr.x]="p.x"
+          [attr.y]="height - margin.bottom + 18"
+          text-anchor="middle"
+        >
+          {{ p.label }}
+        </text>
+      }
+      <rect
+        class="hit"
+        [attr.x]="p.x - hitWidth() / 2"
+        [attr.y]="margin.top"
+        [attr.width]="hitWidth()"
+        [attr.height]="height - margin.top - margin.bottom"
+        (mouseenter)="hovered.set(i)"
+      />
+    }
+  </svg>
+
+  @if (active(); as a) {
+    <div
+      class="tooltip"
+      [style.left.px]="tooltipLeft()"
+      [style.top.px]="a.y > height / 2 ? 8 : height - 150"
+      role="status"
+    >
+      <div class="tt-head">
+        <strong>{{ periodLabel() }} {{ a.label }}</strong>
+        <span class="tt-value">{{ format()(a.value) }}</span>
+      </div>
+      <div class="tt-status" [class.signal]="a.outOfControl">
+        <sga-icon [name]="a.outOfControl ? 'triangle-alert' : 'circle-check'" [size]="14" />
+        {{ statusText(a) }}
+      </div>
+      <div class="tt-limits">
+        LC {{ format()(data().center) }} · LSC {{ format()(a.ucl) }} · LIC {{ format()(a.lcl) }}
+      </div>
+      @if (a.detail) {
+        <div class="tt-detail">{{ a.detail }}</div>
+      }
+    </div>
+  }
+</div>
+
+<div class="legend" aria-hidden="true">
+  <span><i class="key key--series"></i>Valor observado</span>
+  <span><i class="key key--center"></i>Linha central (LC)</span>
+  <span><i class="key key--limit"></i>Limites de controle (LSC/LIC)</span>
+  <span><i class="key key--signal"></i>Fora de controle</span>
+</div>
+
+<table class="sr-only">
+  <caption>
+    {{
+      label()
+    }}
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">{{ periodLabel() }}</th>
+      <th scope="col">Valor</th>
+      <th scope="col">LSC</th>
+      <th scope="col">LIC</th>
+      <th scope="col">Situação</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (p of data().points; track p.label) {
+      <tr>
+        <td>{{ p.label }}</td>
+        <td>{{ format()(p.value) }}</td>
+        <td>{{ format()(p.ucl) }}</td>
+        <td>{{ format()(p.lcl) }}</td>
+        <td>{{ statusText(p) }}</td>
+      </tr>
+    }
+  </tbody>
+</table>

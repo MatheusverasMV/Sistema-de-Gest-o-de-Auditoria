@@ -1,0 +1,130 @@
+<div class="page">
+  <sga-page-header
+    heading="Análise de Dados"
+    [subheading]="
+      analysis()
+        ? (view.value()?.engagement?.client ?? '') + ' · ' + analysis()!.datasetName
+        : 'Demonstração de análise sobre o razão contábil'
+    "
+  />
+
+  @if (view.isLoading()) {
+    <sga-card><sga-loading-state [rows]="6" /></sga-card>
+  } @else if (view.error()) {
+    <sga-card
+      ><sga-empty-state
+        heading="Não foi possível carregar a análise"
+        icon="circle-alert"
+        tone="danger"
+    /></sga-card>
+  } @else if (analysis(); as a) {
+    <section class="grid-3" aria-label="Indicadores da base">
+      <sga-kpi-card
+        label="Lançamentos analisados"
+        icon="database"
+        [value]="(a.entryCount | number) ?? ''"
+        hint="Jan a set/2026"
+      />
+      <sga-kpi-card
+        label="Volume financeiro"
+        icon="trending-up"
+        [value]="a.totalAmount | compactCurrency"
+        [hint]="(a.totalAmount | currency: 'BRL' : 'symbol' : '1.0-0') ?? ''"
+      />
+      <sga-kpi-card
+        label="Exceções identificadas"
+        icon="triangle-alert"
+        tone="warning"
+        [value]="a.exceptionCount"
+        hint="Regras automáticas de alerta"
+      />
+    </section>
+
+    <div class="cols">
+      <sga-card heading="Volume mensal" subheading="Receita registrada por mês, em R$">
+        <p class="readout" aria-live="polite">
+          @if (readout(); as r) {
+            <strong>{{ r.month }}/26</strong> ·
+            {{ r.amount | currency: 'BRL' : 'symbol' : '1.0-0' }} ·
+            {{ r.entries | number }} lançamentos
+            @if (hoveredMonth() === null) {
+              <span class="meta">(maior mês)</span>
+            }
+          }
+        </p>
+        <div class="bars" role="list" (mouseleave)="hoveredMonth.set(null)">
+          @for (m of a.monthly; track m.month; let i = $index) {
+            <div
+              class="bar-slot"
+              role="listitem"
+              tabindex="0"
+              [attr.aria-label]="m.month + ': ' + (m.amount | currency: 'BRL' : 'symbol' : '1.0-0')"
+              (mouseenter)="hoveredMonth.set(i)"
+              (focus)="hoveredMonth.set(i)"
+              (blur)="hoveredMonth.set(null)"
+            >
+              <div
+                class="bar"
+                [class.active]="
+                  hoveredMonth() === i || (hoveredMonth() === null && i === peakIndex())
+                "
+                [style.height.%]="(m.amount / maxMonthly()) * 100"
+              ></div>
+              <span class="bar-label">{{ m.month }}</span>
+            </div>
+          }
+        </div>
+        <p class="meta note">
+          Setembro concentra o maior volume — consistente com o risco de corte (R-01) mapeado no
+          planejamento.
+        </p>
+      </sga-card>
+
+      <sga-card
+        heading="Exceções por regra"
+        [subheading]="a.exceptionCount + ' alertas para investigação'"
+      >
+        <ul class="rules">
+          @for (rule of a.exceptionBreakdown; track rule.rule) {
+            <li>
+              <span>{{ rule.rule }}</span>
+              <span class="rule-bar" aria-hidden="true"
+                ><span [style.width.%]="(rule.count / a.exceptionCount) * 100"></span
+              ></span>
+              <strong class="mono">{{ rule.count }}</strong>
+            </li>
+          }
+        </ul>
+      </sga-card>
+    </div>
+
+    <sga-card heading="Maiores lançamentos" subheading="Top 8 por valor no período" [flush]="true">
+      <sga-data-table caption="Maiores lançamentos" [columns]="columns" [rows]="a.topEntries">
+        <ng-template sgaCell="document" [sgaCellOf]="a.topEntries" let-row
+          ><span class="mono">{{ row.document }}</span></ng-template
+        >
+        <ng-template sgaCell="date" [sgaCellOf]="a.topEntries" let-row
+          ><span class="mono">{{ row.date | calendarDate }}</span></ng-template
+        >
+        <ng-template sgaCell="flag" [sgaCellOf]="a.topEntries" let-row>
+          @if (row.flag) {
+            <sga-status-badge [label]="row.flag" tone="warning" />
+          } @else {
+            <span class="meta">—</span>
+          }
+        </ng-template>
+        <ng-template sgaCell="amount" [sgaCellOf]="a.topEntries" let-row
+          ><span class="mono">{{ row.amount | currency: 'BRL' }}</span></ng-template
+        >
+      </sga-data-table>
+    </sga-card>
+  } @else {
+    <sga-card>
+      <sga-empty-state
+        heading="Nenhuma base carregada"
+        description="Carregue um razão contábil para iniciar a análise."
+        icon="database"
+      />
+    </sga-card>
+  }
+</div>

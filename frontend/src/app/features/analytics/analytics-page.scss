@@ -1,0 +1,99 @@
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--space-4);
+
+  @media (max-width: 1000px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.readout {
+  min-height: 22px;
+  margin-bottom: var(--space-3);
+}
+
+.bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: end;
+  gap: 2px;
+  height: 180px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bar-slot {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  outline: none;
+  cursor: default;
+
+  &:focus-visible .bar {
+    outline: 2px solid var(--green-500);
+    outline-offset: 2px;
+  }
+}
+
+.bar {
+  width: 100%;
+  max-width: 24px;
+  border-radius: 4px 4px 0 0;
+  background: var(--green-200);
+  transition: background-color var(--transition-fast);
+
+  &.active {
+    background: var(--green-700);
+  }
+}
+
+.bar-label {
+  position: absolute;
+  bottom: -22px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.note {
+  margin-top: var(--space-8);
+}
+
+.rules li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 90px 32px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border);
+
+  &:first-child {
+    border-top: 0;
+  }
+}
+
+.rule-bar {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--warning-100);
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: var(--warning-500);
+  }
+}
+
+.rules strong {
+  text-align: right;
+}

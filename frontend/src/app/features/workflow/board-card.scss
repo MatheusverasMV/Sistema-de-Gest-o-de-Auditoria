@@ -1,0 +1,144 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+.surface {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  cursor: grab;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &:hover {
+    border-color: var(--green-200);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--green-500);
+    outline-offset: 1px;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-right: 22px;
+}
+
+.type {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+}
+
+.type--workpaper {
+  background: var(--green-100);
+  color: var(--green-800);
+}
+
+.type--review {
+  background: var(--warning-100);
+  color: var(--warning-700);
+}
+
+.type--issue {
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+
+.type--procedure {
+  background: var(--info-100);
+  color: var(--info-700);
+}
+
+.code {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green-700);
+}
+
+.title {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--text-secondary);
+}
+
+.bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.due {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+
+  &.overdue {
+    color: var(--danger-700);
+    font-weight: 600;
+  }
+}
+
+.assignee {
+  margin-left: auto;
+}
+
+.status {
+  display: flex;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--border);
+}
+
+.open-link {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+
+  &:hover {
+    background: var(--green-100);
+    color: var(--green-800);
+  }
+}

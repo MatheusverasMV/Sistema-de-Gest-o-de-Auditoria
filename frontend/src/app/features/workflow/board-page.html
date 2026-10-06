@@ -1,0 +1,228 @@
+<div class="page">
+  <sga-page-header
+    heading="Fluxo de Trabalho"
+    [subheading]="
+      selectedSummary()
+        ? selectedSummary()!.board.title
+        : 'Quadros operacionais por trabalho de auditoria'
+    "
+  >
+    @if (selectedSummary()?.engagement; as eng) {
+      <a
+        header-actions
+        sgaButton
+        variant="secondary"
+        icon="briefcase"
+        [routerLink]="['/engagements', eng.id]"
+        >Abrir trabalho</a
+      >
+    }
+    <button
+      header-actions
+      sgaButton
+      variant="ghost"
+      icon="rotate-ccw"
+      type="button"
+      (click)="reset()"
+      [disabled]="!current()"
+    >
+      Restaurar quadro
+    </button>
+  </sga-page-header>
+
+  <div class="toolbar">
+    <sga-form-field label="Quadro" for="board-select">
+      <select
+        sgaInput
+        id="board-select"
+        [ngModel]="selectedId()"
+        (ngModelChange)="selectBoard($event)"
+      >
+        @for (s of summaries.value(); track s.board.id) {
+          <option [value]="s.board.id">{{ s.board.title }}</option>
+        }
+      </select>
+    </sga-form-field>
+    <sga-search-input
+      class="search"
+      label="Filtrar cartões"
+      placeholder="Filtrar por código, título ou tag…"
+      [(value)]="query"
+    />
+    <sga-form-field label="Responsável" for="assignee-select">
+      <select sgaInput id="assignee-select" [(ngModel)]="assignee" [disabled]="mineOnly()">
+        <option value="">Todos</option>
+        @for (a of assignees(); track a.id) {
+          <option [value]="a.id">{{ a.name }}</option>
+        }
+      </select>
+    </sga-form-field>
+    <button
+      type="button"
+      class="toggle"
+      [attr.aria-pressed]="mineOnly()"
+      (click)="mineOnly.set(!mineOnly())"
+    >
+      <sga-icon name="users" [size]="16" /> Somente meus cartões
+    </button>
+  </div>
+
+  @if (summaries.isLoading()) {
+    <sga-card><sga-loading-state [rows]="5" label="Carregando quadro…" /></sga-card>
+  } @else if (summaries.error()) {
+    <sga-card
+      ><sga-empty-state
+        heading="Não foi possível carregar o quadro"
+        icon="circle-alert"
+        tone="danger"
+    /></sga-card>
+  } @else if (current()) {
+    @if (filtering()) {
+      <p class="filter-note meta">
+        <sga-icon name="info" [size]="14" /> Filtros ativos: os cartões ocultos mantêm sua posição
+        ao arrastar.
+      </p>
+    }
+    <div class="board" cdkScrollable cdkDropListGroup>
+      @for (column of visibleColumns(); track column.id) {
+        <section class="column" [attr.aria-labelledby]="'col-' + column.id">
+          <header class="column-head">
+            <span
+              class="dot"
+              [class]="'dot dot--' + columnMeta[column.id].tone"
+              aria-hidden="true"
+            ></span>
+            <h2 [id]="'col-' + column.id">{{ column.title }}</h2>
+            <span class="count">{{
+              filtering() ? column.cards.length + '/' + column.total : column.total
+            }}</span>
+          </header>
+          <div
+            class="drop-list"
+            cdkDropList
+            [cdkDropListData]="column.id"
+            (cdkDropListDropped)="onDrop($event)"
+          >
+            @for (card of column.cards; track card.id) {
+              <div class="drag-item" cdkDrag [cdkDragData]="card">
+                <sga-board-card
+                  [card]="card"
+                  [columnId]="column.id"
+                  (selected)="detailId.set($event.id)"
+                />
+                <div class="placeholder" *cdkDragPlaceholder></div>
+              </div>
+            } @empty {
+              <p class="empty-col">Arraste cartões para cá</p>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  } @else {
+    <sga-card><sga-empty-state heading="Nenhum quadro disponível" icon="square-kanban" /></sga-card>
+  }
+</div>
+
+<sga-drawer
+  [heading]="detailCard()?.title ?? 'Cartão'"
+  [subheading]="
+    detailCard()
+      ? typeLabels[detailCard()!.type] + (detailCard()!.code ? ' · ' + detailCard()!.code : '')
+      : ''
+  "
+  [open]="detailOpen()"
+  (openChange)="setDetailOpen($event)"
+  [width]="460"
+>
+  @if (detailCard(); as card) {
+    <dl class="details">
+      <div>
+        <dt>Status</dt>
+        <dd>
+          @if (detailColumn(); as col) {
+            <sga-status-badge [label]="columnMeta[col].label" [tone]="columnMeta[col].tone" />
+          }
+        </dd>
+      </div>
+      <div>
+        <dt>Responsável</dt>
+        <dd><sga-person [userId]="card.assigneeId" [showRole]="true" /></dd>
+      </div>
+      <div>
+        <dt>Prioridade</dt>
+        <dd>
+          <sga-status-badge
+            [label]="priority[card.priority].label"
+            [tone]="priority[card.priority].tone"
+          />
+        </dd>
+      </div>
+      <div>
+        <dt>Prazo</dt>
+        <dd class="mono">{{ card.dueDate | calendarDate }}</dd>
+      </div>
+      <div>
+        <dt>Trabalho</dt>
+        <dd>
+          {{ selectedSummary()?.engagement?.client }} —
+          {{ selectedSummary()?.engagement?.fiscalYear }}
+        </dd>
+      </div>
+      <div>
+        <dt>Tags</dt>
+        <dd class="tags">
+          @for (t of card.tags; track t) {
+            <span class="tag">{{ t }}</span>
+          }
+        </dd>
+      </div>
+      @if (card.taskId) {
+        <div>
+          <dt>Tarefa vinculada</dt>
+          <dd class="mono">{{ card.taskId }}</dd>
+        </div>
+      }
+    </dl>
+
+    <sga-form-field label="Mover para" for="move-to" hint="Alternativa ao arrastar e soltar.">
+      <select sgaInput id="move-to" [ngModel]="detailColumn()" (ngModelChange)="moveTo($event)">
+        @for (col of current()?.columns ?? []; track col.id) {
+          <option [value]="col.id">{{ col.title }}</option>
+        }
+      </select>
+    </sga-form-field>
+
+    @if (card.workpaperId) {
+      <div class="linked-wp">
+        <sga-icon name="file-text" [size]="18" />
+        <div>
+          <strong>Vinculado ao {{ card.workpaperId }}</strong>
+          <p class="meta">
+            Abra o papel de trabalho para consultar procedimentos, evidências e revisão.
+          </p>
+        </div>
+      </div>
+    }
+  }
+  @if (detailCard()?.workpaperId; as wpId) {
+    <a
+      drawer-footer
+      sgaButton
+      variant="primary"
+      icon="external-link"
+      [routerLink]="['/workpapers', wpId]"
+      >Abrir PTA</a
+    >
+  }
+  @if (selectedSummary()?.engagement; as eng) {
+    <a
+      drawer-footer
+      sgaButton
+      variant="secondary"
+      icon="briefcase"
+      [routerLink]="['/engagements', eng.id]"
+      >Abrir trabalho</a
+    >
+  }
+</sga-drawer>

@@ -1,0 +1,118 @@
+@if (detail.isLoading() && !detail.value()) {
+  <sga-card><sga-loading-state [rows]="6" label="Carregando trabalho…" /></sga-card>
+} @else if (detail.error()) {
+  <sga-card>
+    <sga-empty-state
+      heading="Não foi possível carregar o trabalho"
+      icon="circle-alert"
+      tone="danger"
+    >
+      <button sgaButton type="button" icon="rotate-ccw" (click)="detail.reload()">
+        Tentar novamente
+      </button>
+    </sga-empty-state>
+  </sga-card>
+} @else if (detail.value(); as d) {
+  <div class="page">
+    <sga-page-header
+      [heading]="d.engagement.client"
+      [subheading]="d.engagement.title"
+      [breadcrumb]="breadcrumb()"
+    >
+      <sga-status-badge
+        header-badge
+        [label]="status[d.engagement.status].label"
+        [tone]="status[d.engagement.status].tone"
+      />
+      <div header-meta class="header-meta">
+        <span class="meta-item"
+          ><span class="meta">Sócio responsável</span
+          ><sga-person [userId]="d.engagement.partnerId" [showRole]="true"
+        /></span>
+        <span class="meta-item"
+          ><span class="meta">Auditor sênior</span><sga-person [userId]="d.engagement.seniorId"
+        /></span>
+        <span class="meta-item"
+          ><span class="meta">Exercício</span><span>{{ d.engagement.fiscalYear }}</span></span
+        >
+        <span class="meta-item"
+          ><span class="meta">Prazo do relatório</span
+          ><span>{{ d.engagement.reportDueDate | calendarDate }}</span></span
+        >
+        <span class="meta-item">
+          <span class="meta">Risco do trabalho</span>
+          <sga-status-badge
+            [label]="risk[d.engagement.risk].label"
+            [tone]="risk[d.engagement.risk].tone"
+          />
+        </span>
+      </div>
+    </sga-page-header>
+
+    <div class="tabs-wrap">
+      <sga-tabs
+        label="Seções do trabalho"
+        panelId="engagement-panel"
+        [tabs]="tabs()"
+        [selected]="activeTab()"
+        (selectedChange)="selectTab($event)"
+      />
+      <div
+        id="engagement-panel"
+        role="tabpanel"
+        [attr.aria-labelledby]="'tab-' + activeTab()"
+        class="panel"
+      >
+        @switch (activeTab()) {
+          @case ('overview') {
+            <sga-engagement-overview
+              [engagement]="d.engagement"
+              [workpapers]="d.workpapers"
+              (openTab)="selectTab($event)"
+            />
+          }
+          @case ('planning') {
+            <sga-engagement-planning [engagement]="d.engagement" />
+          }
+          @case ('risks') {
+            <sga-engagement-risks [risks]="d.engagement.risks" />
+          }
+          @case ('materiality') {
+            <sga-engagement-materiality [materiality]="d.engagement.materiality" />
+          }
+          @case ('workpapers') {
+            <sga-card
+              heading="Papéis de trabalho"
+              subheading="Clique em um PTA para abrir"
+              [flush]="true"
+            >
+              <sga-workpaper-table
+                [rows]="workpaperRows()"
+                emptyDescription="Nenhum PTA criado para este trabalho."
+              />
+            </sga-card>
+          }
+          @case ('evidences') {
+            <sga-engagement-evidences [workpapers]="d.workpapers" />
+          }
+          @case ('adjustments') {
+            <sga-engagement-adjustments [adjustments]="d.engagement.adjustments" />
+          }
+          @case ('conclusion') {
+            <sga-engagement-conclusion [engagement]="d.engagement" [workpapers]="d.workpapers" />
+          }
+        }
+      </div>
+    </div>
+  </div>
+} @else {
+  <sga-card>
+    <sga-empty-state
+      heading="Trabalho não encontrado"
+      description="O trabalho solicitado não existe ou foi arquivado."
+      icon="briefcase"
+    >
+      <a sgaButton variant="primary" routerLink="/engagements">Ver trabalhos</a>
+    </sga-empty-state>
+  </sga-card>
+}

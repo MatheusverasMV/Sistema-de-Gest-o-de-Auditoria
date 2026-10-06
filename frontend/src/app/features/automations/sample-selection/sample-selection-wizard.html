@@ -1,0 +1,379 @@
+<ol class="stepper" aria-label="Etapas da execução">
+  @for (s of steps; track s.id) {
+    <li
+      [class]="stepState(s.id)"
+      [attr.aria-current]="stepState(s.id) === 'current' ? 'step' : null"
+    >
+      <span class="marker">
+        @if (stepState(s.id) === 'done') {
+          <sga-icon name="check" [size]="14" [strokeWidth]="2.5" />
+        } @else {
+          {{ $index + 1 }}
+        }
+      </span>
+      <span class="step-label">{{ s.label }}</span>
+    </li>
+  }
+</ol>
+
+@if (contextWorkpaper(); as wp) {
+  <div class="context-banner">
+    <sga-icon name="link" [size]="16" />
+    <span>
+      Executando no contexto de <strong>{{ wp.id }} — {{ wp.area }}</strong> ({{
+        engagement()?.client
+      }}) — o resultado poderá ser vinculado diretamente ao PTA.
+    </span>
+  </div>
+}
+
+@if (context.isLoading()) {
+  <sga-card><sga-loading-state [rows]="4" /></sga-card>
+} @else {
+  @switch (step()) {
+    @case ('data') {
+      <sga-card
+        heading="1. Dados de entrada"
+        subheading="Envie a população a ser amostrada: razão contábil ou relatório auxiliar."
+      >
+        <sga-file-uploader
+          [(file)]="file"
+          [demoFile]="{ name: 'Razão 3.1.01 — Receita jan-set 2026.xlsx', size: 4812000 }"
+        />
+        <div class="actions">
+          <button
+            sgaButton
+            variant="primary"
+            type="button"
+            trailingIcon="arrow-right"
+            [disabled]="!file()"
+            (click)="step.set('config')"
+          >
+            Continuar
+          </button>
+        </div>
+      </sga-card>
+    }
+
+    @case ('config') {
+      <sga-card
+        heading="2. Configuração"
+        subheading="Parâmetros da seleção. Os valores sugeridos vêm do planejamento do trabalho."
+      >
+        <div class="form-grid">
+          <sga-form-field
+            label="Trabalho"
+            for="cfg-engagement"
+            [hint]="contextWorkpaper() ? 'Definido pelo PTA de origem.' : undefined"
+          >
+            <select
+              sgaInput
+              id="cfg-engagement"
+              [(ngModel)]="engagementId"
+              [disabled]="!!contextWorkpaper()"
+            >
+              @for (e of context.value()?.engagements ?? []; track e.id) {
+                <option [value]="e.id">{{ e.client }} — {{ e.fiscalYear }}</option>
+              }
+            </select>
+          </sga-form-field>
+
+          <sga-form-field
+            label="Materialidade para execução (R$)"
+            for="cfg-materiality"
+            [hint]="
+              engagement()?.materiality
+                ? 'Aprovada no planejamento: ' +
+                  (engagement()!.materiality!.performance | currency: 'BRL' : 'symbol' : '1.0-0')
+                : 'Trabalho sem materialidade aprovada — informe manualmente.'
+            "
+          >
+            <input
+              sgaInput
+              id="cfg-materiality"
+              type="number"
+              min="1"
+              step="500"
+              [(ngModel)]="materiality"
+              [attr.aria-invalid]="materiality() <= 0"
+              aria-describedby="cfg-materiality-hint"
+            />
+          </sga-form-field>
+
+          <sga-form-field label="Tipo de seleção" for="cfg-method">
+            <select sgaInput id="cfg-method" [(ngModel)]="method">
+              @for (m of methods; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </sga-form-field>
+
+          <sga-form-field
+            label="Quantidade mínima de itens"
+            for="cfg-min"
+            hint="Entre 1 e 500 itens."
+          >
+            <input
+              sgaInput
+              id="cfg-min"
+              type="number"
+              min="1"
+              max="500"
+              [(ngModel)]="minimumItems"
+              [attr.aria-invalid]="!configValid() && (minimumItems() < 1 || minimumItems() > 500)"
+              aria-describedby="cfg-min-hint"
+            />
+          </sga-form-field>
+        </div>
+
+        <div class="file-summary meta">
+          <sga-icon name="file-spreadsheet" [size]="14" /> {{ file()?.name }}
+        </div>
+
+        <div class="actions">
+          <button
+            sgaButton
+            variant="ghost"
+            type="button"
+            icon="arrow-left"
+            (click)="step.set('data')"
+          >
+            Voltar
+          </button>
+          <button
+            sgaButton
+            variant="primary"
+            type="button"
+            icon="play"
+            [disabled]="!configValid()"
+            (click)="run()"
+          >
+            Executar seleção
+          </button>
+        </div>
+      </sga-card>
+    }
+
+    @case ('run') {
+      <sga-card
+        heading="3. Execução"
+        subheading="Processando a população com os parâmetros informados."
+      >
+        @if (runFailed()) {
+          <sga-empty-state
+            heading="A execução falhou"
+            description="Não foi possível concluir a seleção. Revise os parâmetros e tente novamente."
+            icon="circle-alert"
+            tone="danger"
+          >
+            <button sgaButton type="button" icon="arrow-left" (click)="step.set('config')">
+              Voltar à configuração
+            </button>
+          </sga-empty-state>
+        } @else {
+          <sga-progress-bar
+            [value]="(stageIndex() / stages.length) * 100"
+            label="Progresso da execução"
+          />
+          <ul class="stages" aria-live="polite">
+            @for (stage of stages; track stage; let i = $index) {
+              <li [class.done]="i < stageIndex()" [class.active]="i === stageIndex()">
+                @if (i < stageIndex()) {
+                  <sga-icon name="circle-check" [size]="16" />
+                } @else if (i === stageIndex()) {
+                  <sga-icon name="loader" [size]="16" class="spin" />
+                } @else {
+                  <sga-icon name="clock" [size]="16" />
+                }
+                {{ stage }}
+              </li>
+            }
+          </ul>
+        }
+      </sga-card>
+    }
+
+    @case ('result') {
+      @if (result(); as r) {
+        <div class="result">
+          <div class="result-head">
+            <div>
+              <h2 class="section-title">4. Resultado</h2>
+              <p class="meta">
+                Execução {{ r.executionId }} · {{ engagement()?.client }} · {{ r.config.fileName }}
+              </p>
+            </div>
+            <sga-status-badge label="Concluída" tone="success" />
+          </div>
+
+          <div class="figures">
+            <div class="figure">
+              <span class="meta">População</span
+              ><strong>{{ r.populationCount | number }} lançamentos</strong>
+            </div>
+            <div class="figure">
+              <span class="meta">Valor total</span
+              ><strong>{{ r.populationValue | currency: 'BRL' : 'symbol' : '1.0-0' }}</strong>
+            </div>
+            <div class="figure">
+              <span class="meta">Amostra</span><strong>{{ r.items.length }} itens</strong>
+            </div>
+            <div class="figure">
+              <span class="meta">Valor coberto</span
+              ><strong>{{ r.coveredValue | currency: 'BRL' : 'symbol' : '1.0-0' }}</strong>
+            </div>
+            <div class="figure highlight">
+              <span class="meta">Cobertura</span
+              ><strong>{{ r.coverage | percent: '1.1-1' }}</strong>
+            </div>
+          </div>
+
+          <p class="params meta">
+            Parâmetros: {{ methodLabels[r.config.method] }} · materialidade
+            {{ r.config.materiality | currency: 'BRL' : 'symbol' : '1.0-0' }} · mínimo de
+            {{ r.config.minimumItems }} itens · {{ aboveMateriality() }} itens acima da
+            materialidade
+          </p>
+
+          @if (linked(); as outcome) {
+            <div class="linked" role="status">
+              <sga-icon name="circle-check" [size]="20" />
+              <div class="linked-text">
+                <strong
+                  >Resultado vinculado ao {{ outcome.workpaper.id }} —
+                  {{ outcome.workpaper.area }}</strong
+                >
+                <span class="meta">
+                  Anexado como evidência e procedimento de seleção de amostras marcado como
+                  concluído.
+                </span>
+              </div>
+              <button
+                sgaButton
+                variant="primary"
+                type="button"
+                icon="arrow-left"
+                (click)="openWorkpaper()"
+              >
+                Voltar ao PTA
+              </button>
+            </div>
+          }
+
+          <div class="result-actions">
+            <button sgaButton type="button" icon="eye" (click)="sampleOpen.set(true)">
+              Visualizar amostra
+            </button>
+            <button sgaButton type="button" icon="download" (click)="download()">
+              Baixar Excel
+            </button>
+            @if (!linked()) {
+              <button
+                sgaButton
+                variant="primary"
+                type="button"
+                icon="link"
+                [loading]="linking()"
+                [disabled]="linking()"
+                (click)="requestLink()"
+              >
+                {{ workpaperId() ? 'Vincular ao ' + workpaperId() : 'Vincular ao PTA' }}
+              </button>
+            }
+            <button
+              sgaButton
+              variant="ghost"
+              type="button"
+              icon="rotate-ccw"
+              class="restart"
+              (click)="restart()"
+            >
+              Nova execução
+            </button>
+          </div>
+        </div>
+
+        <sga-drawer
+          heading="Amostra selecionada"
+          [subheading]="
+            r.items.length + ' itens · ' + (r.coveredValue | currency: 'BRL' : 'symbol' : '1.0-0')
+          "
+          [(open)]="sampleOpen"
+          [width]="860"
+        >
+          <sga-data-table caption="Itens da amostra" [columns]="sampleColumns" [rows]="r.items">
+            <ng-template sgaCell="document" [sgaCellOf]="r.items" let-row
+              ><span class="mono">{{ row.document }}</span></ng-template
+            >
+            <ng-template sgaCell="date" [sgaCellOf]="r.items" let-row
+              ><span class="mono">{{ row.date | calendarDate }}</span></ng-template
+            >
+            <ng-template sgaCell="amount" [sgaCellOf]="r.items" let-row
+              ><span class="mono">{{ row.amount | currency: 'BRL' }}</span></ng-template
+            >
+            <ng-template sgaCell="reason" [sgaCellOf]="r.items" let-row>
+              <sga-status-badge
+                [label]="row.reason"
+                [tone]="row.reason === 'Acima da materialidade' ? 'warning' : 'info'"
+              />
+            </ng-template>
+          </sga-data-table>
+          <button drawer-footer sgaButton type="button" icon="download" (click)="download()">
+            Baixar Excel
+          </button>
+        </sga-drawer>
+
+        <sga-drawer
+          heading="Vincular ao PTA"
+          [subheading]="engagement()?.client"
+          [(open)]="linkOpen"
+          [width]="460"
+        >
+          @if (linkCandidates().length) {
+            <sga-form-field
+              label="Papel de trabalho"
+              for="link-target"
+              hint="O resultado será anexado como evidência do PTA selecionado."
+            >
+              <select sgaInput id="link-target" [(ngModel)]="linkTarget">
+                @for (w of linkCandidates(); track w.id) {
+                  <option [value]="w.id">
+                    {{ w.id }} — {{ w.area }} ({{ wpStatus[w.status].label }})
+                  </option>
+                }
+              </select>
+            </sga-form-field>
+          } @else {
+            <sga-empty-state
+              heading="Nenhum PTA em aberto"
+              description="Este trabalho não possui PTAs que aceitem novas evidências."
+              icon="file-text"
+              [compact]="true"
+            />
+          }
+          <button
+            drawer-footer
+            sgaButton
+            variant="ghost"
+            type="button"
+            (click)="linkOpen.set(false)"
+          >
+            Cancelar
+          </button>
+          <button
+            drawer-footer
+            sgaButton
+            variant="primary"
+            type="button"
+            icon="link"
+            [loading]="linking()"
+            [disabled]="!linkTarget() || linking()"
+            (click)="link()"
+          >
+            Vincular
+          </button>
+        </sga-drawer>
+      }
+    }
+  }
+}

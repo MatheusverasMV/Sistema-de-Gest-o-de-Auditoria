@@ -1,0 +1,81 @@
+// Design tokens do SGA.
+// Os verdes são provisórios: substituir aqui quando a identidade oficial for definida.
+:root {
+  // Marca
+  --green-950: #123d2b;
+  --green-800: #185238;
+  --green-700: #1f6b45;
+  --green-500: #3a8c5c;
+  --green-200: #b7e4c7;
+  --green-100: #dcf3e4;
+  --green-50: #eff9f2;
+
+  // Neutros
+  --background: #f5f8f5;
+  --surface: #ffffff;
+  --surface-muted: #f8faf8;
+  --surface-sunken: #eef2ef;
+  --border: #e2e8e4;
+  --border-strong: #cbd5ce;
+  --text-primary: #17211b;
+  --text-secondary: #66736a;
+  --text-muted: #6f7b73;
+  --text-on-brand: #ffffff;
+
+  // Semânticos (status)
+  --success-700: #1f6b45;
+  --success-100: #dcf3e4;
+  --warning-700: #8a5a00;
+  --warning-500: #d99a00;
+  --warning-100: #fdf1d3;
+  --danger-700: #b42318;
+  --danger-500: #d92d20;
+  --danger-100: #fde7e4;
+  --info-700: #1d5c96;
+  --info-500: #2e7cc4;
+  --info-100: #e1eefa;
+  --neutral-700: #4b5650;
+  --neutral-100: #eef2ef;
+
+  // Aplicação dos tokens
+  --brand: var(--green-700);
+  --brand-hover: var(--green-800);
+  --brand-strong: var(--green-950);
+  --brand-subtle: var(--green-100);
+  --focus-ring: 0 0 0 3px rgb(58 140 92 / 40%);
+
+  // Tipografia
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fs-page-title: 28px;
+  --fs-section-title: 20px;
+  --fs-card-title: 16px;
+  --fs-body: 14px;
+  --fs-meta: 12px;
+
+  // Espaçamento (escala de 4px)
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  // Forma e profundidade
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgb(18 61 43 / 6%);
+  --shadow-md: 0 4px 12px rgb(18 61 43 / 8%);
+  --shadow-lg: 0 12px 32px rgb(18 61 43 / 14%);
+
+  // Layout
+  --sidebar-width: 248px;
+  --sidebar-width-collapsed: 72px;
+  --topbar-height: 64px;
+  --page-padding: 28px;
+  --content-max-width: 1440px;
+
+  --transition-fast: 120ms ease;
+}
