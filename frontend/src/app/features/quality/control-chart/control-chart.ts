@@ -1,19 +1,34 @@
-import { Component, computed, DestroyRef, ElementRef, inject, input, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { ControlChartData, ControlChartPoint } from '../../../core/models';
 import { Icon } from '../../../shared/ui';
 
-const HEIGHT = 280;
-const MARGIN = { top: 20, right: 64, bottom: 32, left: 48 };
+const MARGIN = { top: 28, right: 84, bottom: 32, left: 52 };
 const MIN_LABEL_SPACING = 52;
+const MIN_VALUE_LABEL_SPACING = 40;
+const LIMIT_LABEL_GAP = 13;
+const TOOLTIP_WIDTH = 260;
 
 interface PlotPoint extends ControlChartPoint {
   readonly x: number;
   readonly y: number;
 }
 
+type Marker = 'critical' | 'attention' | 'info' | 'normal';
+
 /**
  * Renderização SVG de uma carta de controle (série + LC + LSC/LIC). Não calcula
- * estatística: recebe pontos já processados por `control-limits.ts`.
+ * estatística: recebe pontos já processados por `control-limits.ts`. O conteúdo
+ * contextual do tooltip vem dos próprios pontos (`facts`, `detail`), sem regra
+ * específica de métrica aqui.
  */
 @Component({
   selector: 'sga-control-chart',
@@ -23,14 +38,22 @@ interface PlotPoint extends ControlChartPoint {
 })
 export class ControlChart {
   readonly data = input.required<ControlChartData>();
-  /** Formata valores do eixo, rótulos e tooltip (ex.: "4,2 d", "12,5%"). */
+  /** Formato curto: eixo, rótulos de limite (ex.: "4,2 d", "12,5%"). */
   readonly format = input.required<(value: number) => string>();
+  /** Formato do valor no tooltip e na tabela acessível; padrão = `format`. */
+  readonly valueFormat = input<(value: number) => string>();
   readonly label = input.required<string>();
+  /** Prefixo do rótulo do ponto no tooltip ("Mês"); vazio quando o rótulo já se explica. */
   readonly periodLabel = input('Período');
+  readonly height = input(280);
+  /** Ponto destacado (ex.: aberto no drill-down). */
+  readonly selectedId = input<string | null>(null);
+
+  /** Clique, Enter ou Espaço sobre um ponto. */
+  readonly pointSelect = output<ControlChartPoint>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly width = signal(720);
-  protected readonly height = HEIGHT;
   protected readonly margin = MARGIN;
   protected readonly hovered = signal<number | null>(null);
 
@@ -42,33 +65,58 @@ export class ControlChart {
     inject(DestroyRef).onDestroy(() => observer.disconnect());
   }
 
-  private readonly innerWidth = computed(() => this.width() - MARGIN.left - MARGIN.right);
-  private readonly innerHeight = HEIGHT - MARGIN.top - MARGIN.bottom;
+  protected readonly tooltipValue = computed(() => this.valueFormat() ?? this.format());
 
+  private readonly innerWidth = computed(() => this.width() - MARGIN.left - MARGIN.right);
+  private readonly innerHeight = computed(() => this.height() - MARGIN.top - MARGIN.bottom);
+
+  /**
+   * Domínio Y: inclui zero, valores observados, linha central e todos os limites.
+   * Suporta valores e limites negativos (ex.: desvio de horas).
+   */
   protected readonly yTicks = computed(() => {
-    const { points } = this.data();
-    const max = Math.max(...points.map((p) => Math.max(p.value, p.ucl))) * 1.1;
-    const step = niceStep(max / 4);
-    const ticks: number[] = [];
-    for (let v = 0; v <= max + step * 0.01; v += step) {
-      ticks.push(v);
+    const { points, center } = this.data();
+    const values = points.flatMap((p) => [p.value, p.ucl, p.lcl]);
+    let min = Math.min(0, center, ...values);
+    let max = Math.max(0, center, ...values);
+    if (max === min) {
+      max = min + 1;
     }
-    if (ticks[ticks.length - 1] < max) {
-      ticks.push(ticks[ticks.length - 1] + step);
+    const pad = (max - min) * 0.08;
+    max += pad;
+    if (min < 0) {
+      min -= pad;
+    }
+    const step = niceStep((max - min) / 4);
+    const first = Math.floor(min / step + 1e-9);
+    const last = Math.ceil(max / step - 1e-9);
+    const ticks: number[] = [];
+    for (let k = first; k <= last; k++) {
+      ticks.push(Number((k * step).toFixed(10)) || 0);
     }
     return ticks;
   });
 
-  private readonly yMax = computed(() => this.yTicks()[this.yTicks().length - 1] || 1);
+  private readonly yMin = computed(() => this.yTicks()[0]);
+  private readonly yMax = computed(() => this.yTicks()[this.yTicks().length - 1]);
 
   protected y(value: number): number {
-    return MARGIN.top + this.innerHeight - (value / this.yMax()) * this.innerHeight;
+    const span = this.yMax() - this.yMin() || 1;
+    return MARGIN.top + this.innerHeight() * (1 - (value - this.yMin()) / span);
   }
+
+  /** Linha de referência em zero quando o domínio cruza o zero. */
+  protected readonly zeroY = computed(() => (this.yMin() < 0 ? this.y(0) : null));
 
   protected readonly plot = computed<PlotPoint[]>(() => {
     const { points } = this.data();
     const stepX = points.length > 1 ? this.innerWidth() / (points.length - 1) : 0;
-    return points.map((p, i) => ({ ...p, x: MARGIN.left + i * stepX, y: this.y(p.value) }));
+    const offset = points.length > 1 ? 0 : this.innerWidth() / 2;
+    return points.map((p, i) => ({
+      ...p,
+      x: MARGIN.left + offset + i * stepX,
+      y: this.y(p.value),
+    }));
   });
 
   protected readonly linePath = computed(() =>
@@ -77,21 +125,85 @@ export class ControlChart {
       .join(''),
   );
 
-  /** Limites em degraus: constantes na carta I, variáveis por período na carta p. */
+  /** Limites em degraus: constantes na carta I, variáveis por período nas cartas p e u. */
   protected readonly uclPath = computed(() => this.stepPath((p) => p.ucl));
   protected readonly lclPath = computed(() => this.stepPath((p) => p.lcl));
   protected readonly centerY = computed(() => this.y(this.data().center));
 
-  protected readonly lastUcl = computed(() => this.plot()[this.plot().length - 1]?.ucl ?? 0);
-  protected readonly lastLcl = computed(() => this.plot()[this.plot().length - 1]?.lcl ?? 0);
-  protected readonly hasLcl = computed(() => this.data().points.some((p) => p.lcl > 0));
-
-  protected readonly xLabelEvery = computed(() => {
-    const n = this.data().points.length;
-    return Math.max(1, Math.ceil(n / Math.max(1, this.innerWidth() / MIN_LABEL_SPACING)));
+  /** Rótulos LSC/LC/LIC à direita, afastados entre si quando os valores são próximos. */
+  protected readonly limitLabels = computed(() => {
+    const last = this.plot()[this.plot().length - 1];
+    if (!last) {
+      return [];
+    }
+    const labels = [
+      { key: 'ucl', text: `LSC ${this.format()(last.ucl)}`, y: this.y(last.ucl), strong: false },
+      {
+        key: 'center',
+        text: `LC ${this.format()(this.data().center)}`,
+        y: this.centerY(),
+        strong: true,
+      },
+      { key: 'lcl', text: `LIC ${this.format()(last.lcl)}`, y: this.y(last.lcl), strong: false },
+    ];
+    for (let i = 1; i < labels.length; i++) {
+      labels[i].y = Math.max(labels[i].y, labels[i - 1].y + LIMIT_LABEL_GAP);
+    }
+    const overflow = labels[labels.length - 1].y - (this.height() - MARGIN.bottom);
+    if (overflow > 0) {
+      labels.forEach((l) => (l.y -= overflow));
+    }
+    return labels;
   });
 
-  protected readonly signals = computed(() => this.data().points.filter((p) => p.outOfControl));
+  /** Fronteira entre o período de referência da baseline e o período monitorado. */
+  protected readonly phaseBoundary = computed(() => {
+    const plot = this.plot();
+    const index = plot.findIndex((p) => p.phase === 'monitoring');
+    if (index <= 0 || !plot.some((p) => p.phase === 'reference')) {
+      return null;
+    }
+    return (plot[index - 1].x + plot[index].x) / 2;
+  });
+
+  protected readonly xLabels = computed(() => {
+    const labels: { x: number; text: string }[] = [];
+    let lastX = -Infinity;
+    for (const p of this.plot()) {
+      const text = p.axisLabel ?? p.label;
+      if (text && p.x - lastX >= MIN_LABEL_SPACING) {
+        labels.push({ x: p.x, text });
+        lastX = p.x;
+      }
+    }
+    return labels;
+  });
+
+  /**
+   * Pontos fora de controle que recebem rótulo de valor. Vizinhos muito próximos não
+   * repetem o rótulo (o valor segue no tooltip e na tabela acessível).
+   */
+  protected readonly valueLabels = computed(() => {
+    const ids = new Set<string>();
+    let lastX = -Infinity;
+    for (const p of this.plot()) {
+      if (p.outOfControl && p.x - lastX >= MIN_VALUE_LABEL_SPACING) {
+        ids.add(p.id);
+        lastX = p.x;
+      }
+    }
+    return ids;
+  });
+
+  protected readonly legend = computed(() => {
+    const points = this.data().points;
+    return {
+      signal: points.some((p) => p.outOfControl || p.flag === 'critical'),
+      attention: points.some((p) => p.flag === 'attention' && !p.outOfControl),
+      info: points.some((p) => p.flag === 'info' && !p.outOfControl),
+      reference: this.phaseBoundary() !== null,
+    };
+  });
 
   protected readonly active = computed(() => {
     const index = this.hovered();
@@ -103,8 +215,7 @@ export class ControlChart {
     if (!point) {
       return 0;
     }
-    const tooltipWidth = 240;
-    return Math.min(Math.max(point.x - tooltipWidth / 2, 0), this.width() - tooltipWidth);
+    return Math.min(Math.max(point.x - TOOLTIP_WIDTH / 2, 0), this.width() - TOOLTIP_WIDTH);
   });
 
   protected readonly hitWidth = computed(() => {
@@ -112,23 +223,61 @@ export class ControlChart {
     return n > 1 ? this.innerWidth() / (n - 1) : this.innerWidth();
   });
 
+  protected marker(point: ControlChartPoint): Marker {
+    if (point.flag) {
+      return point.flag;
+    }
+    return point.outOfControl ? 'critical' : 'normal';
+  }
+
+  /** Losango para causa especial, círculo para os demais: o sinal não depende só da cor. */
+  protected diamond(p: PlotPoint, r: number): string {
+    return `M${p.x},${p.y - r}L${p.x + r},${p.y}L${p.x},${p.y + r}L${p.x - r},${p.y}Z`;
+  }
+
   protected onKeydown(event: KeyboardEvent): void {
     const last = this.data().points.length - 1;
     const current = this.hovered();
-    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-      event.preventDefault();
-      const delta = event.key === 'ArrowRight' ? 1 : -1;
-      this.hovered.set(
-        current === null ? (delta > 0 ? 0 : last) : Math.min(last, Math.max(0, current + delta)),
-      );
-    } else if (event.key === 'Escape') {
-      this.hovered.set(null);
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowLeft': {
+        event.preventDefault();
+        const delta = event.key === 'ArrowRight' ? 1 : -1;
+        this.hovered.set(
+          current === null ? (delta > 0 ? 0 : last) : Math.min(last, Math.max(0, current + delta)),
+        );
+        break;
+      }
+      case 'Home':
+      case 'End':
+        event.preventDefault();
+        this.hovered.set(event.key === 'Home' ? 0 : last);
+        break;
+      case 'Enter':
+      case ' ':
+        if (current !== null) {
+          event.preventDefault();
+          this.select(current);
+        }
+        break;
+      case 'Escape':
+        this.hovered.set(null);
+        break;
+    }
+  }
+
+  protected select(index: number): void {
+    const point = this.data().points[index];
+    if (point) {
+      this.pointSelect.emit(point);
     }
   }
 
   protected statusText(point: ControlChartPoint): string {
     if (point.value > point.ucl) return 'Fora de controle · acima do LSC';
     if (point.value < point.lcl) return 'Fora de controle · abaixo do LIC';
+    if (point.flag === 'attention' || point.flag === 'info')
+      return 'Dentro dos limites · padrão a observar';
     return 'Dentro dos limites';
   }
 

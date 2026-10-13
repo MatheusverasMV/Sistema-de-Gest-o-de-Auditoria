@@ -59,7 +59,7 @@ const TYPE_ICON: Record<BoardCard['type'], string> = {
         <sga-status-badge [label]="statusMeta().label" [tone]="statusMeta().tone" />
       </span>
     </button>
-    @if (card().workpaperId) {
+    @if (card().workpaperId && workpaperLinked()) {
       <a
         class="open-link"
         [routerLink]="['/workpapers', card().workpaperId]"
@@ -77,6 +77,8 @@ export class BoardCardView {
   private readonly people = inject(PeopleService);
 
   readonly card = input.required<BoardCard>();
+  /** O PTA vinculado existe no catálogo? Sem vínculo válido, o atalho não é exibido. */
+  readonly workpaperLinked = input(true);
   readonly columnId = input.required<BoardColumnId>();
   readonly selected = output<BoardCard>();
 

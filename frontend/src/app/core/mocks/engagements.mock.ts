@@ -1,8 +1,10 @@
-import { Engagement } from '../models';
+import { Engagement, EngagementIdentity, toEngagementIdentity } from '../models';
 
 export const ENGAGEMENTS: readonly Engagement[] = [
   {
     id: 'eng-alfa-2026',
+    clientId: 'cli-alfa',
+    type: 'financial_statements',
     client: 'Empresa Alfa S.A.',
     title: 'Auditoria das Demonstrações Financeiras — 2026',
     fiscalYear: 2026,
@@ -90,6 +92,8 @@ export const ENGAGEMENTS: readonly Engagement[] = [
   },
   {
     id: 'eng-beta-2026',
+    clientId: 'cli-beta',
+    type: 'financial_statements',
     client: 'Beta Ltda.',
     title: 'Auditoria das Demonstrações Financeiras — 2026',
     fiscalYear: 2026,
@@ -121,6 +125,8 @@ export const ENGAGEMENTS: readonly Engagement[] = [
   },
   {
     id: 'eng-gama-2026',
+    clientId: 'cli-gama',
+    type: 'financial_statements',
     client: 'Gama S.A.',
     title: 'Auditoria das Demonstrações Financeiras — 2026',
     fiscalYear: 2026,
@@ -161,6 +167,8 @@ export const ENGAGEMENTS: readonly Engagement[] = [
   },
   {
     id: 'eng-alfa-2025',
+    clientId: 'cli-alfa',
+    type: 'financial_statements',
     client: 'Empresa Alfa S.A.',
     title: 'Auditoria das Demonstrações Financeiras — 2025',
     fiscalYear: 2025,
@@ -186,4 +194,42 @@ export const ENGAGEMENTS: readonly Engagement[] = [
     conclusion:
       'Relatório do auditor emitido em 24/02/2026 com opinião sem modificação. Distorções não corrigidas abaixo da materialidade.',
   },
+];
+
+/*
+ * Trabalhos históricos: existem no protótipo apenas como contexto das observações
+ * estatísticas de Qualidade. Não têm registro operacional (escopo, PTAs, quadro), não
+ * aparecem na lista de Trabalhos e não são navegáveis. Não foram criados PTAs fictícios.
+ */
+export const HISTORICAL_ENGAGEMENTS: readonly EngagementIdentity[] = [
+  {
+    id: 'eng-alfa-itr-2026',
+    clientId: 'cli-alfa',
+    type: 'interim_review',
+    fiscalYear: 2026,
+    title: 'Revisão de Informações Trimestrais (ITR) — 2026',
+    recordKind: 'historical',
+  },
+  {
+    id: 'eng-beta-2025',
+    clientId: 'cli-beta',
+    type: 'financial_statements',
+    fiscalYear: 2025,
+    title: 'Auditoria das Demonstrações Financeiras — 2025',
+    recordKind: 'historical',
+  },
+  {
+    id: 'eng-gama-2025',
+    clientId: 'cli-gama',
+    type: 'financial_statements',
+    fiscalYear: 2025,
+    title: 'Auditoria das Demonstrações Financeiras — 2025',
+    recordKind: 'historical',
+  },
+];
+
+/** Catálogo completo de identidades de trabalho: operacionais + históricos. */
+export const ENGAGEMENT_CATALOG: readonly EngagementIdentity[] = [
+  ...ENGAGEMENTS.map(toEngagementIdentity),
+  ...HISTORICAL_ENGAGEMENTS,
 ];

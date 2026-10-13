@@ -2,11 +2,15 @@ import { Observable } from 'rxjs';
 import {
   Activity,
   AppNotification,
+  AuditArea,
   Automation,
   AutomationExecution,
   Board,
+  Client,
   Engagement,
+  EngagementIdentity,
   Evidence,
+  ExternalReference,
   LedgerAnalysis,
   QualityDataset,
   SampleSelectionConfig,
@@ -28,9 +32,18 @@ export abstract class UserRepository {
   abstract list(): Observable<User[]>;
 }
 
+/** Dados de referência compartilhados: clientes e áreas de auditoria. */
+export abstract class ReferenceDataRepository {
+  abstract clients(): Observable<Client[]>;
+  abstract auditAreas(): Observable<AuditArea[]>;
+}
+
 export abstract class EngagementRepository {
+  /** Trabalhos operacionais (registro completo). */
   abstract list(): Observable<Engagement[]>;
   abstract get(id: string): Observable<Engagement | null>;
+  /** Identidades de todos os trabalhos conhecidos, inclusive históricos sem registro operacional. */
+  abstract identities(): Observable<EngagementIdentity[]>;
 }
 
 export abstract class WorkpaperRepository {
@@ -75,6 +88,11 @@ export abstract class ActivityRepository {
 
 export abstract class QualityRepository {
   abstract dataset(): Observable<QualityDataset>;
+}
+
+/** Vínculos explícitos com plataformas externas (Trello). Vazio quando não há integração. */
+export abstract class ExternalReferenceRepository {
+  abstract list(): Observable<ExternalReference[]>;
 }
 
 export abstract class AnalyticsRepository {

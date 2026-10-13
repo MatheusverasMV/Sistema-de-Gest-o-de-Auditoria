@@ -10,7 +10,9 @@ import {
   SAMPLE_POPULATION,
 } from '../../mocks/automations.mock';
 import { BOARDS } from '../../mocks/boards.mock';
-import { ENGAGEMENTS } from '../../mocks/engagements.mock';
+import { AUDIT_AREAS, CLIENTS } from '../../mocks/clients.mock';
+import { ENGAGEMENT_CATALOG, ENGAGEMENTS } from '../../mocks/engagements.mock';
+import { EXTERNAL_REFERENCES } from '../../mocks/external-references.mock';
 import { QUALITY_DATASET } from '../../mocks/quality.mock';
 import { TASKS } from '../../mocks/tasks.mock';
 import { USERS } from '../../mocks/users.mock';
@@ -18,11 +20,15 @@ import { WORKPAPERS } from '../../mocks/workpapers.mock';
 import {
   Activity,
   AppNotification,
+  AuditArea,
   Automation,
   AutomationExecution,
   Board,
+  Client,
   Engagement,
+  EngagementIdentity,
   Evidence,
+  ExternalReference,
   LedgerAnalysis,
   QualityDataset,
   SampleSelectionConfig,
@@ -38,7 +44,9 @@ import {
   AutomationRepository,
   BoardRepository,
   EngagementRepository,
+  ExternalReferenceRepository,
   QualityRepository,
+  ReferenceDataRepository,
   TaskRepository,
   UserRepository,
   WorkpaperRepository,
@@ -66,6 +74,17 @@ class MockUserRepository extends UserRepository {
 }
 
 @Injectable()
+class MockReferenceDataRepository extends ReferenceDataRepository {
+  clients(): Observable<Client[]> {
+    return respond([...CLIENTS]);
+  }
+
+  auditAreas(): Observable<AuditArea[]> {
+    return respond([...AUDIT_AREAS]);
+  }
+}
+
+@Injectable()
 class MockEngagementRepository extends EngagementRepository {
   list(): Observable<Engagement[]> {
     return respond([...ENGAGEMENTS]);
@@ -73,6 +92,10 @@ class MockEngagementRepository extends EngagementRepository {
 
   get(id: string): Observable<Engagement | null> {
     return respond(ENGAGEMENTS.find((e) => e.id === id) ?? null);
+  }
+
+  identities(): Observable<EngagementIdentity[]> {
+    return respond([...ENGAGEMENT_CATALOG]);
   }
 }
 
@@ -251,6 +274,13 @@ class MockQualityRepository extends QualityRepository {
 }
 
 @Injectable()
+class MockExternalReferenceRepository extends ExternalReferenceRepository {
+  list(): Observable<ExternalReference[]> {
+    return respond([...EXTERNAL_REFERENCES]);
+  }
+}
+
+@Injectable()
 class MockAnalyticsRepository extends AnalyticsRepository {
   ledgerAnalysis(engagementId: string): Observable<LedgerAnalysis | null> {
     return respond(LEDGER_ANALYSES.find((a) => a.engagementId === engagementId) ?? null);
@@ -261,6 +291,7 @@ class MockAnalyticsRepository extends AnalyticsRepository {
 export function provideMockRepositories(): EnvironmentProviders {
   return makeEnvironmentProviders([
     { provide: UserRepository, useClass: MockUserRepository },
+    { provide: ReferenceDataRepository, useClass: MockReferenceDataRepository },
     { provide: EngagementRepository, useClass: MockEngagementRepository },
     { provide: WorkpaperRepository, useClass: MockWorkpaperRepository },
     { provide: TaskRepository, useClass: MockTaskRepository },
@@ -269,5 +300,6 @@ export function provideMockRepositories(): EnvironmentProviders {
     { provide: ActivityRepository, useClass: MockActivityRepository },
     { provide: QualityRepository, useClass: MockQualityRepository },
     { provide: AnalyticsRepository, useClass: MockAnalyticsRepository },
+    { provide: ExternalReferenceRepository, useClass: MockExternalReferenceRepository },
   ]);
 }

@@ -1,0 +1,176 @@
+<div class="page">
+  <sga-page-header
+    heading="Qualidade & Processos"
+    subheading="Onde existe algo anormal nos trabalhos que merece atenção · exclusivo para Sócios"
+  >
+    <span header-badge class="restricted"><sga-icon name="lock" [size]="12" />Acesso restrito</span>
+  </sga-page-header>
+
+  @if (source.error()) {
+    <sga-card>
+      <sga-empty-state
+        heading="Não foi possível carregar os indicadores"
+        icon="circle-alert"
+        tone="danger"
+      >
+        <button sgaButton type="button" icon="rotate-ccw" (click)="source.reload()">
+          Tentar novamente
+        </button>
+      </sga-empty-state>
+    </sga-card>
+  } @else {
+    @let d = dashboard();
+
+    <sga-card class="filters">
+      <form
+        class="filters__row"
+        role="search"
+        aria-label="Recorte da análise"
+        (submit)="$event.preventDefault()"
+      >
+        <sga-form-field label="Cliente" for="quality-client">
+          <select sgaInput id="quality-client" [disabled]="!d" (change)="setClient(value($event))">
+            <option value="" [selected]="!filters().clientId">Todos os clientes</option>
+            @for (o of d?.options?.clients ?? []; track o.value) {
+              <option [value]="o.value" [selected]="o.value === filters().clientId">
+                {{ o.label }}
+              </option>
+            }
+          </select>
+        </sga-form-field>
+        <sga-form-field label="Trabalho" for="quality-engagement">
+          <select
+            sgaInput
+            id="quality-engagement"
+            [disabled]="!d"
+            (change)="setEngagement(value($event))"
+          >
+            <option value="" [selected]="!filters().engagementId">Todos os trabalhos</option>
+            @for (o of d?.options?.engagements ?? []; track o.value) {
+              <option [value]="o.value" [selected]="o.value === filters().engagementId">
+                {{ o.label }}
+              </option>
+            }
+          </select>
+        </sga-form-field>
+        <sga-form-field label="Área de auditoria" for="quality-area">
+          <select sgaInput id="quality-area" [disabled]="!d" (change)="setArea(value($event))">
+            <option value="" [selected]="!filters().auditArea">Todas as áreas</option>
+            @for (o of d?.options?.areas ?? []; track o.value) {
+              <option [value]="o.value" [selected]="o.value === filters().auditArea">
+                {{ o.label }}
+              </option>
+            }
+          </select>
+        </sga-form-field>
+        <button
+          sgaButton
+          type="button"
+          variant="ghost"
+          icon="x"
+          [disabled]="!d?.view?.filtered"
+          (click)="clearFilters()"
+        >
+          Limpar filtros
+        </button>
+      </form>
+      @if (d) {
+        <p class="filters__segment meta" aria-live="polite">
+          Recorte: <strong>{{ d.segmentLabel }}</strong> ·
+          @if (d.view.filtered) {
+            limites estimados para este recorte (baseline provisória), sem misturar com a população
+            da firma
+          } @else {
+            limites das baselines aprovadas da firma
+          }
+        </p>
+      }
+    </sga-card>
+
+    <section class="grid-kpi" aria-label="Indicadores de apoio">
+      @if (d) {
+        @for (m of d.metrics; track m.id) {
+          <sga-kpi-card
+            [label]="m.label"
+            [value]="m.value"
+            [hint]="m.hint"
+            [icon]="m.icon"
+            [tone]="m.tone"
+          />
+        }
+      } @else {
+        @for (i of [1, 2, 3, 4]; track i) {
+          <sga-kpi-card label="Carregando…" [loading]="true" />
+        }
+      }
+    </section>
+
+    <sga-card
+      heading="Sinais que exigem atenção"
+      subheading="Regras ativas: ponto além dos limites de controle · seis observações consecutivas em tendência · aumento de variabilidade (MR)"
+      [flush]="true"
+    >
+      <div card-actions class="signal-summary">
+        @for (s of signalSummary(); track s.severity) {
+          <span [class]="'count count--' + s.tone">
+            <sga-icon [name]="s.icon" [size]="13" />{{ s.count }} {{ s.label }}
+          </span>
+        }
+      </div>
+      @if (d) {
+        <sga-quality-signal-list [signals]="d.view.signals" (open)="openSignal($event)" />
+      } @else {
+        <sga-loading-state [rows]="3" label="Carregando sinais…" />
+      }
+    </sga-card>
+
+    <div class="dimensions">
+      @for (section of sections(); track section.id) {
+        <section
+          class="dimension"
+          [class.dimension--wide]="section.analyses.length > 1 || !d"
+          [attr.aria-labelledby]="'dimension-' + section.id"
+        >
+          <header class="dimension__header">
+            <h2 class="section-title" [id]="'dimension-' + section.id">{{ section.label }}</h2>
+            <p class="meta">{{ section.question }}</p>
+          </header>
+          <div class="dimension__grid">
+            @for (a of section.analyses; track a.definition.id) {
+              <sga-quality-metric-card
+                [analysis]="a"
+                [selected]="selectedFor(a.definition.id)"
+                (pointSelect)="openPoint(a.definition.id, $event)"
+              />
+            } @empty {
+              <sga-card>
+                <sga-loading-state [rows]="6" label="Carregando cartas de controle…" />
+              </sga-card>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>
+
+<sga-drawer
+  [open]="drill() !== null"
+  (openChange)="onDrawerOpenChange($event)"
+  [heading]="drill()?.analysis?.definition?.title ?? 'Detalhe'"
+  [subheading]="drill() ? 'Detalhamento do ponto ' + drill()!.point.label : undefined"
+  [width]="560"
+>
+  @if (drill(); as dd) {
+    <sga-quality-drill-down [drill]="dd" />
+  }
+  <button
+    drawer-footer
+    sgaButton
+    type="button"
+    icon="arrow-left"
+    (click)="onDrawerOpenChange(false)"
+  >
+    Voltar à visão executiva
+  </button>
+</sga-drawer>

@@ -1,0 +1,94 @@
+.restricted {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--green-950);
+  color: var(--green-100);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+}
+
+.filters__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: var(--space-3);
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.filters__segment {
+  margin-top: var(--space-3);
+}
+
+.signal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.count--danger {
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+
+.count--warning {
+  background: var(--warning-100);
+  color: var(--warning-700);
+}
+
+.count--info {
+  background: var(--info-100);
+  color: var(--info-700);
+}
+
+// Dimensões com um único indicador dividem a linha; as com dois ocupam a largura toda.
+.dimensions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: var(--space-6) var(--space-4);
+}
+
+.dimension {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.dimension--wide {
+  grid-column: 1 / -1;
+}
+
+.dimension__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+}
+
+.dimension__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: var(--space-4);
+  flex: 1;
+}

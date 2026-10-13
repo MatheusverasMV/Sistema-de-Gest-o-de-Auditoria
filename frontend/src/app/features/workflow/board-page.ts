@@ -148,6 +148,11 @@ export default class BoardPage {
     return board && id ? columnOf(board, id) : undefined;
   });
 
+  /** Só oferece atalho para PTAs que existem no catálogo canônico. */
+  protected isWorkpaperLinked(workpaperId: string | undefined): boolean {
+    return !!workpaperId && !!this.selectedSummary()?.linkedWorkpaperIds.has(workpaperId);
+  }
+
   protected selectBoard(id: string): void {
     this.selectedId.set(id);
     this.router.navigate([], {

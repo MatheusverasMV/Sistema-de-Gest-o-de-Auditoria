@@ -2,15 +2,17 @@
   class="chart"
   tabindex="0"
   role="group"
-  [attr.aria-label]="label() + '. Use as setas para percorrer os períodos.'"
+  [attr.aria-label]="
+    label() + '. Use as setas para percorrer os pontos e Enter para abrir o detalhe.'
+  "
   (keydown)="onKeydown($event)"
   (mouseleave)="hovered.set(null)"
   (blur)="hovered.set(null)"
 >
   <svg
     [attr.width]="width()"
-    [attr.height]="height"
-    [attr.viewBox]="'0 0 ' + width() + ' ' + height"
+    [attr.height]="height()"
+    [attr.viewBox]="'0 0 ' + width() + ' ' + height()"
     aria-hidden="true"
   >
     <!-- Grade e eixo Y -->
@@ -32,12 +34,41 @@
         {{ format()(tick) }}
       </text>
     }
+    @if (zeroY(); as zy) {
+      <line
+        class="zero"
+        [attr.x1]="margin.left"
+        [attr.x2]="width() - margin.right"
+        [attr.y1]="zy"
+        [attr.y2]="zy"
+      />
+    }
+
+    <!-- Referência da baseline × monitoramento -->
+    @if (phaseBoundary(); as bx) {
+      <rect
+        class="reference-band"
+        [attr.x]="margin.left"
+        [attr.y]="margin.top"
+        [attr.width]="bx - margin.left"
+        [attr.height]="height() - margin.top - margin.bottom"
+      />
+      <line
+        class="phase"
+        [attr.x1]="bx"
+        [attr.x2]="bx"
+        [attr.y1]="margin.top - 14"
+        [attr.y2]="height() - margin.bottom"
+      />
+      <text class="phase-label" [attr.x]="bx - 6" [attr.y]="margin.top - 8" text-anchor="end">
+        Referência
+      </text>
+      <text class="phase-label" [attr.x]="bx + 6" [attr.y]="margin.top - 8">Monitoramento</text>
+    }
 
     <!-- Limites e linha central -->
     <path class="limit" [attr.d]="uclPath()" />
-    @if (hasLcl()) {
-      <path class="limit" [attr.d]="lclPath()" />
-    }
+    <path class="limit" [attr.d]="lclPath()" />
     <line
       class="center"
       [attr.x1]="margin.left"
@@ -45,31 +76,17 @@
       [attr.y1]="centerY()"
       [attr.y2]="centerY()"
     />
-
-    <text
-      class="limit-label"
-      [attr.x]="width() - margin.right + 8"
-      [attr.y]="y(lastUcl())"
-      dominant-baseline="middle"
-    >
-      LSC {{ format()(lastUcl()) }}
-    </text>
-    <text
-      class="limit-label strong"
-      [attr.x]="width() - margin.right + 8"
-      [attr.y]="centerY()"
-      dominant-baseline="middle"
-    >
-      LC {{ format()(data().center) }}
-    </text>
-    <text
-      class="limit-label"
-      [attr.x]="width() - margin.right + 8"
-      [attr.y]="y(lastLcl())"
-      dominant-baseline="middle"
-    >
-      LIC {{ format()(lastLcl()) }}
-    </text>
+    @for (l of limitLabels(); track l.key) {
+      <text
+        class="limit-label"
+        [class.strong]="l.strong"
+        [attr.x]="width() - margin.right + 8"
+        [attr.y]="l.y"
+        dominant-baseline="middle"
+      >
+        {{ l.text }}
+      </text>
+    }
 
     <!-- Crosshair -->
     @if (active(); as a) {
@@ -78,41 +95,58 @@
         [attr.x1]="a.x"
         [attr.x2]="a.x"
         [attr.y1]="margin.top"
-        [attr.y2]="height - margin.bottom"
+        [attr.y2]="height() - margin.bottom"
       />
     }
 
     <!-- Série -->
     <path class="series" [attr.d]="linePath()" />
-    @for (p of plot(); track p.label; let i = $index) {
-      <circle
-        [class]="p.outOfControl ? 'point point--signal' : 'point'"
-        [attr.cx]="p.x"
-        [attr.cy]="p.y"
-        [attr.r]="p.outOfControl || hovered() === i ? 5.5 : 4"
-      />
-      @if (p.outOfControl) {
-        <text class="signal-label" [attr.x]="p.x" [attr.y]="p.y - 12" text-anchor="middle">
+    @for (p of plot(); track p.id; let i = $index) {
+      @let m = marker(p);
+      @let big = m !== 'normal' || hovered() === i || selectedId() === p.id;
+      @if (selectedId() === p.id) {
+        <circle class="selected-ring" [attr.cx]="p.x" [attr.cy]="p.y" r="10" />
+      }
+      @if (m === 'critical') {
+        <path class="point point--critical" [attr.d]="diamond(p, big ? 7 : 5.5)" />
+      } @else {
+        <circle
+          [class]="'point point--' + m"
+          [attr.cx]="p.x"
+          [attr.cy]="p.y"
+          [attr.r]="big ? 5.5 : 3.5"
+        />
+      }
+      @if (valueLabels().has(p.id)) {
+        <text
+          class="signal-label"
+          [attr.x]="p.x"
+          [attr.y]="p.value < p.lcl ? p.y + 20 : p.y - 12"
+          text-anchor="middle"
+        >
           {{ format()(p.value) }}
         </text>
       }
-      @if (i % xLabelEvery() === 0) {
-        <text
-          class="axis"
-          [attr.x]="p.x"
-          [attr.y]="height - margin.bottom + 18"
-          text-anchor="middle"
-        >
-          {{ p.label }}
-        </text>
-      }
+    }
+    @for (l of xLabels(); track l.x) {
+      <text
+        class="axis"
+        [attr.x]="l.x"
+        [attr.y]="height() - margin.bottom + 18"
+        text-anchor="middle"
+      >
+        {{ l.text }}
+      </text>
+    }
+    @for (p of plot(); track p.id; let i = $index) {
       <rect
         class="hit"
         [attr.x]="p.x - hitWidth() / 2"
         [attr.y]="margin.top"
         [attr.width]="hitWidth()"
-        [attr.height]="height - margin.top - margin.bottom"
+        [attr.height]="height() - margin.top - margin.bottom"
         (mouseenter)="hovered.set(i)"
+        (click)="select(i)"
       />
     }
   </svg>
@@ -121,23 +155,47 @@
     <div
       class="tooltip"
       [style.left.px]="tooltipLeft()"
-      [style.top.px]="a.y > height / 2 ? 8 : height - 150"
+      [style.top.px]="a.y > height() / 2 ? 4 : null"
+      [style.bottom.px]="a.y > height() / 2 ? null : 4"
       role="status"
     >
       <div class="tt-head">
-        <strong>{{ periodLabel() }} {{ a.label }}</strong>
-        <span class="tt-value">{{ format()(a.value) }}</span>
+        <strong>
+          @if (periodLabel()) {
+            {{ periodLabel() }}
+          }
+          {{ a.label }}
+        </strong>
+        <span class="tt-value">{{ tooltipValue()(a.value) }}</span>
       </div>
-      <div class="tt-status" [class.signal]="a.outOfControl">
-        <sga-icon [name]="a.outOfControl ? 'triangle-alert' : 'circle-check'" [size]="14" />
+      <div
+        class="tt-status"
+        [class.signal]="a.outOfControl"
+        [class.warn]="!a.outOfControl && a.flag"
+      >
+        <sga-icon
+          [name]="a.outOfControl ? 'triangle-alert' : a.flag ? 'circle-alert' : 'circle-check'"
+          [size]="14"
+        />
         {{ statusText(a) }}
       </div>
+      @if (a.facts?.length) {
+        <dl class="tt-facts">
+          @for (f of a.facts; track f.label) {
+            <div>
+              <dt>{{ f.label }}</dt>
+              <dd>{{ f.value }}</dd>
+            </div>
+          }
+        </dl>
+      }
       <div class="tt-limits">
         LC {{ format()(data().center) }} · LSC {{ format()(a.ucl) }} · LIC {{ format()(a.lcl) }}
       </div>
       @if (a.detail) {
         <div class="tt-detail">{{ a.detail }}</div>
       }
+      <div class="tt-hint">Clique ou pressione Enter para detalhar</div>
     </div>
   }
 </div>
@@ -146,33 +204,47 @@
   <span><i class="key key--series"></i>Valor observado</span>
   <span><i class="key key--center"></i>Linha central (LC)</span>
   <span><i class="key key--limit"></i>Limites de controle (LSC/LIC)</span>
-  <span><i class="key key--signal"></i>Fora de controle</span>
+  @if (legend().signal) {
+    <span><i class="key key--signal"></i>Fora de controle</span>
+  }
+  @if (legend().attention) {
+    <span><i class="key key--attention"></i>Padrão sob atenção</span>
+  }
+  @if (legend().info) {
+    <span><i class="key key--info"></i>Padrão informativo</span>
+  }
+  @if (legend().reference) {
+    <span><i class="key key--reference"></i>Período de referência da baseline</span>
+  }
 </div>
 
-<table class="sr-only">
-  <caption>
-    {{
-      label()
-    }}
-  </caption>
-  <thead>
-    <tr>
-      <th scope="col">{{ periodLabel() }}</th>
-      <th scope="col">Valor</th>
-      <th scope="col">LSC</th>
-      <th scope="col">LIC</th>
-      <th scope="col">Situação</th>
-    </tr>
-  </thead>
-  <tbody>
-    @for (p of data().points; track p.label) {
+<!-- Tabelas ignoram width/height de 1px: o wrapper é que fica visualmente oculto. -->
+<div class="sr-only">
+  <table>
+    <caption>
+      {{
+        label()
+      }}
+    </caption>
+    <thead>
       <tr>
-        <td>{{ p.label }}</td>
-        <td>{{ format()(p.value) }}</td>
-        <td>{{ format()(p.ucl) }}</td>
-        <td>{{ format()(p.lcl) }}</td>
-        <td>{{ statusText(p) }}</td>
+        <th scope="col">Ponto</th>
+        <th scope="col">Valor</th>
+        <th scope="col">LSC</th>
+        <th scope="col">LIC</th>
+        <th scope="col">Situação</th>
       </tr>
-    }
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      @for (p of data().points; track p.id) {
+        <tr>
+          <td>{{ p.label }}</td>
+          <td>{{ tooltipValue()(p.value) }}</td>
+          <td>{{ format()(p.ucl) }}</td>
+          <td>{{ format()(p.lcl) }}</td>
+          <td>{{ statusText(p) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

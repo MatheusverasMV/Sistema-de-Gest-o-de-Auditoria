@@ -108,6 +108,7 @@
                 <sga-board-card
                   [card]="card"
                   [columnId]="column.id"
+                  [workpaperLinked]="isWorkpaperLinked(card.workpaperId)"
                   (selected)="detailId.set($event.id)"
                 />
                 <div class="placeholder" *cdkDragPlaceholder></div>
@@ -194,26 +195,41 @@
     </sga-form-field>
 
     @if (card.workpaperId) {
-      <div class="linked-wp">
-        <sga-icon name="file-text" [size]="18" />
-        <div>
-          <strong>Vinculado ao {{ card.workpaperId }}</strong>
-          <p class="meta">
-            Abra o papel de trabalho para consultar procedimentos, evidências e revisão.
-          </p>
+      @if (isWorkpaperLinked(card.workpaperId)) {
+        <div class="linked-wp">
+          <sga-icon name="file-text" [size]="18" />
+          <div>
+            <strong>Vinculado ao {{ card.workpaperId }}</strong>
+            <p class="meta">
+              Abra o papel de trabalho para consultar procedimentos, evidências e revisão.
+            </p>
+          </div>
         </div>
-      </div>
+      } @else {
+        <div class="linked-wp linked-wp--missing" role="note">
+          <sga-icon name="circle-alert" [size]="18" />
+          <div>
+            <strong>Vínculo operacional não identificado</strong>
+            <p class="meta">
+              O cartão referencia {{ card.workpaperId }}, que não existe entre os papéis de
+              trabalho.
+            </p>
+          </div>
+        </div>
+      }
     }
   }
   @if (detailCard()?.workpaperId; as wpId) {
-    <a
-      drawer-footer
-      sgaButton
-      variant="primary"
-      icon="external-link"
-      [routerLink]="['/workpapers', wpId]"
-      >Abrir PTA</a
-    >
+    @if (isWorkpaperLinked(wpId)) {
+      <a
+        drawer-footer
+        sgaButton
+        variant="primary"
+        icon="external-link"
+        [routerLink]="['/workpapers', wpId]"
+        >Abrir PTA</a
+      >
+    }
   }
   @if (selectedSummary()?.engagement; as eng) {
     <a

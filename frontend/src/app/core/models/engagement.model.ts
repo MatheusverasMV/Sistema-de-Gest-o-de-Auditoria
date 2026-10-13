@@ -1,3 +1,4 @@
+import { RecordKind } from './entity.model';
 import { StatusMeta } from './status.model';
 
 export type EngagementStatus = 'planning' | 'fieldwork' | 'review' | 'completed';
@@ -54,9 +55,21 @@ export const ADJUSTMENT_STATUS_META: Record<AuditAdjustment['status'], StatusMet
   waived: { label: 'Não registrado', tone: 'neutral' },
 };
 
+/** Tipo de trabalho. Compõe o rótulo curto ("Auditoria das DFs 2026") e é dimensão de estratificação. */
+export type EngagementType = 'financial_statements' | 'interim_review';
+
+export const ENGAGEMENT_TYPE_LABELS: Record<EngagementType, string> = {
+  financial_statements: 'Auditoria das DFs',
+  interim_review: 'Revisão de ITR',
+};
+
 export interface Engagement {
   readonly id: string;
+  /** Chave canônica do cliente (catálogo de clientes). */
+  readonly clientId: string;
+  /** Nome do cliente para exibição; deve coincidir com o nome do cliente em `clientId`. */
   readonly client: string;
+  readonly type: EngagementType;
   readonly title: string;
   readonly fiscalYear: number;
   readonly partnerId: string;
@@ -72,4 +85,39 @@ export interface Engagement {
   readonly materiality: Materiality | null;
   readonly adjustments: readonly AuditAdjustment[];
   readonly conclusion: string | null;
+}
+
+/**
+ * Identidade de um trabalho no catálogo compartilhado. Cobre os trabalhos operacionais
+ * (registro completo, tela própria) e os históricos, conhecidos apenas pelas observações
+ * estatísticas de Qualidade — estes nunca contam como trabalhos ativos.
+ */
+export interface EngagementIdentity {
+  readonly id: string;
+  readonly clientId: string;
+  readonly type: EngagementType;
+  readonly fiscalYear: number;
+  readonly title: string;
+  readonly recordKind: RecordKind;
+  /** Somente trabalhos operacionais têm status no fluxo. */
+  readonly status?: EngagementStatus;
+}
+
+export function toEngagementIdentity(engagement: Engagement): EngagementIdentity {
+  return {
+    id: engagement.id,
+    clientId: engagement.clientId,
+    type: engagement.type,
+    fiscalYear: engagement.fiscalYear,
+    title: engagement.title,
+    recordKind: 'operational',
+    status: engagement.status,
+  };
+}
+
+/** "Auditoria das DFs 2026", "Revisão de ITR 2026". */
+export function engagementShortTitle(
+  engagement: Pick<EngagementIdentity, 'type' | 'fiscalYear'>,
+): string {
+  return `${ENGAGEMENT_TYPE_LABELS[engagement.type]} ${engagement.fiscalYear}`;
 }

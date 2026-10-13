@@ -199,3 +199,12 @@
     margin-top: 2px;
   }
 }
+
+.linked-wp--missing {
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+
+  > sga-icon {
+    color: var(--warning-700);
+  }
+}
