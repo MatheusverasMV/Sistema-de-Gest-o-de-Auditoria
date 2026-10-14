@@ -33,6 +33,12 @@ export interface BoardCard {
   readonly engagementId: string;
   readonly workpaperId?: string;
   readonly taskId?: string;
+  /**
+   * Último evento formal do PTA já refletido na posição do cartão. A projeção
+   * PTA → Kanban só move o cartão quando surge um evento formal mais novo; depois disso,
+   * arrastar o cartão é movimentação operacional e não é desfeita.
+   */
+  readonly projectedEventId?: string;
 }
 
 export interface BoardColumn {

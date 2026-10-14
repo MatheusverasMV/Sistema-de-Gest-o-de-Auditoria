@@ -143,3 +143,10 @@ textarea.sga-input {
 .cdk-drag-animating {
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+// Com um painel lateral modal aberto, os avisos vão para a esquerda: não podem cobrir
+// os botões de confirmação no rodapé do painel (ex.: ações formais em sequência no PTA).
+body:has(sga-drawer [role='dialog']) sga-toast-outlet .stack {
+  right: auto;
+  left: var(--space-6);
+}

@@ -6,6 +6,8 @@ import {
   CARD_TYPE_LABELS,
   COLUMN_STATUS_META,
   PRIORITY_META,
+  WORKPAPER_STATUS_META,
+  WorkpaperStatus,
 } from '../../core/models';
 import { PeopleService } from '../../core/services/people.service';
 import { CalendarDatePipe, isOverdue } from '../../shared/pipes/pipes';
@@ -57,6 +59,12 @@ const TYPE_ICON: Record<BoardCard['type'], string> = {
       </span>
       <span class="status">
         <sga-status-badge [label]="statusMeta().label" [tone]="statusMeta().tone" />
+        @if (formalStatus(); as formal) {
+          <span class="formal" [class.formal--differs]="positionDiffers()">
+            <sga-icon [name]="positionDiffers() ? 'circle-alert' : 'file-text'" [size]="12" />
+            PTA: {{ workpaperStatus[formal].label }}
+          </span>
+        }
       </span>
     </button>
     @if (card().workpaperId && workpaperLinked()) {
@@ -79,6 +87,12 @@ export class BoardCardView {
   readonly card = input.required<BoardCard>();
   /** O PTA vinculado existe no catálogo? Sem vínculo válido, o atalho não é exibido. */
   readonly workpaperLinked = input(true);
+  /** Status formal do PTA representado (só cartões do tipo PTA). */
+  readonly formalStatus = input<WorkpaperStatus>();
+  /** A coluna atual difere da coluna do status formal (movimentação operacional). */
+  readonly positionDiffers = input(false);
+
+  protected readonly workpaperStatus = WORKPAPER_STATUS_META;
   readonly columnId = input.required<BoardColumnId>();
   readonly selected = output<BoardCard>();
 
@@ -93,6 +107,6 @@ export class BoardCardView {
   );
   protected readonly ariaLabel = computed(() => {
     const c = this.card();
-    return `${CARD_TYPE_LABELS[c.type]} ${c.code ?? ''} ${c.title}. Responsável: ${this.assigneeName()}. Prioridade ${PRIORITY_META[c.priority].label}. Status: ${this.statusMeta().label}. Abrir detalhes.`;
+    return `${CARD_TYPE_LABELS[c.type]} ${c.code ?? ''} ${c.title}. Responsável: ${this.assigneeName()}. Prioridade ${PRIORITY_META[c.priority].label}. Coluna: ${this.statusMeta().label}.${this.formalStatus() ? ` Status formal do PTA: ${WORKPAPER_STATUS_META[this.formalStatus()!].label}.` : ''} Abrir detalhes.`;
   });
 }

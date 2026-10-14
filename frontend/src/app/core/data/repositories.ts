@@ -1,8 +1,10 @@
 import { Observable } from 'rxjs';
+import { WorkflowBaseline, WorkflowLog } from './workflow-log';
 import {
   Activity,
   AppNotification,
   AuditArea,
+  AuditEvent,
   Automation,
   AutomationExecution,
   Board,
@@ -18,7 +20,6 @@ import {
   Task,
   User,
   Workpaper,
-  WorkpaperStatus,
 } from '../models';
 
 /*
@@ -48,14 +49,34 @@ export abstract class EngagementRepository {
 
 export abstract class WorkpaperRepository {
   abstract list(): Observable<Workpaper[]>;
+  /** O status devolvido é o formal: projeção do histórico de eventos sobre o status herdado. */
   abstract get(id: string): Observable<Workpaper | null>;
-  abstract updateStatus(id: string, status: WorkpaperStatus): Observable<Workpaper>;
   /** Anexa uma evidência e, opcionalmente, marca como concluído o procedimento que a originou. */
   abstract addEvidence(
     id: string,
     evidence: Evidence,
     completedProcedureId?: string,
   ): Observable<Workpaper>;
+}
+
+/** Uma operação formal: todos os seus eventos são gravados juntos ou nenhum é gravado. */
+export interface WorkflowAppend {
+  /** Revisão lida antes de decidir a operação; diferente da atual ⇒ conflito, nada é gravado. */
+  readonly expectedRevision: number;
+  readonly events: readonly AuditEvent[];
+  /** Status herdado de PTAs que entram no histórico nesta operação (nunca sobrescritos). */
+  readonly baselines?: Readonly<Record<string, WorkflowBaseline>>;
+}
+
+/**
+ * Histórico de eventos (append-only). Única fonte do estado formal dos PTAs.
+ * Erros são WorkflowError: `corrupted_storage`, `conflict` ou `storage_failure`.
+ */
+export abstract class WorkflowRepository {
+  abstract load(): Observable<WorkflowLog>;
+  abstract append(change: WorkflowAppend): Observable<WorkflowLog>;
+  /** Restaura a demonstração (histórico vazio), guardando cópia do conteúdo anterior. */
+  abstract reset(): Observable<WorkflowLog>;
 }
 
 export abstract class TaskRepository {

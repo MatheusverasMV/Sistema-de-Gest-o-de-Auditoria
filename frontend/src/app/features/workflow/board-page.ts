@@ -18,6 +18,8 @@ import {
   CARD_TYPE_LABELS,
   COLUMN_STATUS_META,
   PRIORITY_META,
+  WORKPAPER_STATUS_META,
+  WorkpaperStatus,
 } from '../../core/models';
 import { PeopleService } from '../../core/services/people.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -37,7 +39,8 @@ import {
   StatusBadge,
 } from '../../shared/ui';
 import { BoardCardView } from './board-card';
-import { columnOf, findCard, moveCard } from './board-logic';
+import { WorkpaperWorkflowService } from '../workpapers/workpaper-workflow.service';
+import { columnForStatus, columnOf, findCard, moveCard, representsWorkpaper } from './board-logic';
 import { BoardService } from './board.service';
 
 @Component({
@@ -70,6 +73,7 @@ import { BoardService } from './board.service';
 })
 export default class BoardPage {
   private readonly service = inject(BoardService);
+  private readonly workflow = inject(WorkpaperWorkflowService);
   private readonly session = inject(SessionService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
@@ -148,6 +152,21 @@ export default class BoardPage {
     return board && id ? columnOf(board, id) : undefined;
   });
 
+  /** Status formal do PTA representado pelo cartão (só cartões do tipo PTA). */
+  protected formalStatusOf(card: BoardCard): WorkpaperStatus | undefined {
+    return representsWorkpaper(card)
+      ? this.selectedSummary()?.workpaperStatuses.get(card.workpaperId)
+      : undefined;
+  }
+
+  /** A posição operacional do cartão difere da coluna do status formal? */
+  protected positionDiffers(card: BoardCard, column: BoardColumnId | undefined): boolean {
+    const status = this.formalStatusOf(card);
+    return !!status && !!column && columnForStatus(status, column) !== column;
+  }
+
+  protected readonly workpaperStatusMeta = WORKPAPER_STATUS_META;
+
   /** Só oferece atalho para PTAs que existem no catálogo canônico. */
   protected isWorkpaperLinked(workpaperId: string | undefined): boolean {
     return !!workpaperId && !!this.selectedSummary()?.linkedWorkpaperIds.has(workpaperId);
@@ -214,8 +233,14 @@ export default class BoardPage {
     this.current.set(updated);
     this.service.save(updated).subscribe();
     if (fromColumn !== toColumn) {
+      // Movimentação operacional: registrada no histórico, nunca convertida em ato formal.
+      this.workflow
+        .recordCardMove(card, board.id, fromColumn, toColumn)
+        .subscribe({ error: () => undefined });
       this.toast.show(
-        `${card.code ?? card.title} movido para ${COLUMN_STATUS_META[toColumn].label}.`,
+        representsWorkpaper(card)
+          ? `${card.code ?? card.title} movido para ${COLUMN_STATUS_META[toColumn].label}. O status formal do PTA não muda pelo quadro.`
+          : `${card.code ?? card.title} movido para ${COLUMN_STATUS_META[toColumn].label}.`,
       );
     }
   }

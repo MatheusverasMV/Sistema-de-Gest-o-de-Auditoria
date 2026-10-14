@@ -1,18 +1,22 @@
 import { BoardColumnId } from './board.model';
 import { EntityType } from './entity.model';
+import { ReviewNoteSeverity } from './review-note.model';
 import { WorkpaperStatus } from './workpaper.model';
 
 /*
- * Contrato preliminar do histórico de eventos (Incremento 01: só tipos e validação básica).
- * Não há motor de eventos nem event sourcing: o estado atual continua nos repositórios.
+ * Histórico de eventos (event log simplificado, append-only). Cada evento é imutável:
+ * mudanças de estado são novos eventos, nunca edições. O estado formal do PTA, os ciclos
+ * de revisão e os review notes são projeções puras deste log (ver workpaper-workflow.ts).
  *
  * Distinção central:
  * - Evento FORMAL: ato técnico do fluxo de revisão, registrado no SGA por quem tem a
- *   responsabilidade (ex.: REVIEW_APPROVED). É o que alimentará as métricas de Qualidade.
- * - Evento OPERACIONAL: movimentação de organização do trabalho (ex.: cartão movido no
- *   Kanban ou no Trello). Indica intenção ou contexto, nunca equivale a um ato formal.
- *   "Cartão movido para Em revisão" não significa que o revisor iniciou a análise.
+ *   responsabilidade (ex.: REVIEW_APPROVED). Alimentará as métricas de Qualidade.
+ * - Evento OPERACIONAL: organização do trabalho (ex.: cartão movido no Kanban ou no
+ *   Trello). Nunca equivale a um ato formal: "cartão em Em revisão" não significa que o
+ *   revisor iniciou a análise, e "cartão em Concluído" não aprova o PTA.
  */
+
+export const AUDIT_EVENT_SCHEMA_VERSION = 1;
 
 export type EventSource = 'sga' | 'trello' | 'import';
 
@@ -54,50 +58,85 @@ export const EVENT_NATURE: Readonly<Record<AuditEventType, EventNature>> = {
   BOARD_CARD_ASSIGNED: 'operational',
 };
 
-interface AuditEventBase<TType extends AuditEventType, TEntity extends EntityType, TPayload> {
+type EmptyPayload = Readonly<Record<string, never>>;
+
+/** Payload específico de cada evento de PTA. */
+export interface WorkpaperEventPayloads {
+  readonly WORKPAPER_CREATED: EmptyPayload;
+  /** Início da preparação ou retomada após devolução (`fromStatus: 'with_issues'`). */
+  readonly PREPARATION_STARTED: { readonly fromStatus: WorkpaperStatus };
+  readonly SUBMITTED_FOR_REVIEW: { readonly reviewerId: string };
+  readonly RESUBMITTED: { readonly reviewerId: string; readonly previousCycleId?: string };
+  readonly REVIEW_STARTED: EmptyPayload;
+  readonly REVIEW_NOTE_CREATED: {
+    readonly reviewNoteId: string;
+    readonly description: string;
+    readonly severity: ReviewNoteSeverity;
+    readonly assignedTo: string;
+  };
+  readonly REVIEW_NOTE_RESOLVED: { readonly reviewNoteId: string; readonly resolution?: string };
+  readonly RETURNED_FOR_CORRECTION: {
+    readonly reason: string;
+    readonly openReviewNoteIds: readonly string[];
+  };
+  readonly REVIEW_APPROVED: EmptyPayload;
+  readonly WORKPAPER_FINALIZED: EmptyPayload;
+  readonly WORKPAPER_REOPENED: { readonly reason: string };
+}
+
+export interface BoardCardEventPayloads {
+  readonly BOARD_CARD_CREATED: { readonly boardId: string };
+  readonly BOARD_CARD_MOVED: {
+    readonly boardId: string;
+    readonly fromColumn?: BoardColumnId;
+    readonly toColumn: BoardColumnId;
+  };
+  readonly BOARD_CARD_ASSIGNED: { readonly boardId: string; readonly assigneeId: string };
+}
+
+interface AuditEventEnvelope<TType extends AuditEventType, TEntity extends EntityType, TPayload> {
   readonly id: string;
+  readonly schemaVersion: typeof AUDIT_EVENT_SCHEMA_VERSION;
+  /** Ordem de registro no log (monotônica). Desempata eventos com o mesmo occurredAt. */
+  readonly sequence: number;
   readonly eventType: TType;
+  readonly eventCategory: EventNature;
   readonly entityType: TEntity;
   readonly entityId: string;
   /** Trabalho a que o evento pertence (desnormalizado para recortes e métricas). */
-  readonly engagementId?: string;
-  /** Quando o fato aconteceu na origem (ISO 8601). */
+  readonly engagementId: string;
+  readonly workpaperId?: string;
+  readonly reviewCycleId?: string;
+  /** Quem praticou o ato. Obrigatório para eventos formais. */
+  readonly actorId?: string;
+  /** Quando o fato aconteceu na origem (ISO 8601 em UTC). */
   readonly occurredAt: string;
   /** Quando o SGA registrou o fato; ≥ occurredAt (importações chegam depois). */
   readonly recordedAt: string;
-  readonly actorId?: string;
   readonly source: EventSource;
   /** Id do evento na origem externa (ex.: action do Trello), para idempotência. */
   readonly externalEventId?: string;
+  /** Agrupa os eventos de uma mesma operação (ex.: aprovação + finalização). */
+  readonly correlationId?: string;
+  /** Evento que causou este (ex.: WORKPAPER_FINALIZED ← REVIEW_APPROVED). */
+  readonly causationId?: string;
   readonly payload: TPayload;
 }
 
-export interface WorkpaperEventPayload {
-  /** Status do PTA antes/depois, quando o evento muda o status. */
-  readonly fromStatus?: WorkpaperStatus;
-  readonly toStatus?: WorkpaperStatus;
-  /** Review note envolvido (REVIEW_NOTE_CREATED / REVIEW_NOTE_RESOLVED). */
-  readonly reviewNoteId?: string;
-  readonly comment?: string;
-}
+export type WorkpaperEvent = {
+  [K in WorkpaperEventType]: AuditEventEnvelope<K, 'workpaper', WorkpaperEventPayloads[K]>;
+}[WorkpaperEventType];
 
-export interface BoardCardEventPayload {
-  readonly boardId: string;
-  readonly fromColumn?: BoardColumnId;
-  readonly toColumn?: BoardColumnId;
-  readonly assigneeId?: string;
-}
-
-export type WorkpaperEvent = AuditEventBase<WorkpaperEventType, 'workpaper', WorkpaperEventPayload>;
-
-export type BoardCardEvent = AuditEventBase<
-  BoardCardEventType,
-  'board_card',
-  BoardCardEventPayload
->;
+export type BoardCardEvent = {
+  [K in BoardCardEventType]: AuditEventEnvelope<K, 'board_card', BoardCardEventPayloads[K]>;
+}[BoardCardEventType];
 
 export type AuditEvent = WorkpaperEvent | BoardCardEvent;
 
 export function eventNature(event: AuditEvent): EventNature {
   return EVENT_NATURE[event.eventType];
+}
+
+export function isWorkpaperEvent(event: AuditEvent): event is WorkpaperEvent {
+  return event.entityType === 'workpaper';
 }

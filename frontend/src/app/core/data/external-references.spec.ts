@@ -170,10 +170,14 @@ describe('Payload fictício do Trello → evento operacional normalizado', () =>
     if (!location) return null;
     return {
       id: 'EV-T-1',
+      schemaVersion: 1,
+      sequence: 1,
       eventType: 'BOARD_CARD_MOVED',
+      eventCategory: 'operational',
       entityType: 'board_card',
       entityId: location.card.id,
       engagementId: location.card.engagementId,
+      workpaperId: location.card.workpaperId,
       occurredAt: trelloAction.date,
       recordedAt: '2026-10-05T14:12:05.000Z',
       source: 'trello',

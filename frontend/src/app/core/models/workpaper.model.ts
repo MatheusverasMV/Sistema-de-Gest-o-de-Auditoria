@@ -29,10 +29,6 @@ export const OPEN_WORKPAPER_STATUSES: readonly WorkpaperStatus[] = [
   'with_issues',
 ];
 
-export function canSubmitForReview(status: WorkpaperStatus): boolean {
-  return status === 'in_preparation' || status === 'with_issues';
-}
-
 export interface Procedure {
   readonly id: string;
   readonly description: string;
@@ -67,7 +63,12 @@ export interface Evidence {
   readonly executionId?: string;
 }
 
-export interface ReviewNote {
+/**
+ * Ponto de revisão herdado dos dados do protótipo, anterior ao fluxo formal: não pertence
+ * a nenhum ciclo e não participa das regras de workflow. Pontos novos são `ReviewNote`
+ * (review-note.model.ts), registrados pelo histórico de eventos.
+ */
+export interface LegacyReviewNote {
   readonly id: string;
   readonly authorId: string;
   readonly date: string;
@@ -92,5 +93,5 @@ export interface Workpaper {
   readonly exceptions: readonly WorkpaperException[];
   readonly evidences: readonly Evidence[];
   readonly conclusion: string;
-  readonly reviewNotes: readonly ReviewNote[];
+  readonly reviewNotes: readonly LegacyReviewNote[];
 }

@@ -45,3 +45,28 @@ export class CalendarDatePipe implements PipeTransform {
 export function isOverdue(dueDate: string): boolean {
   return dueDate.slice(0, 10) < prototypeNow().toISOString().slice(0, 10);
 }
+
+const DATE_TIME = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: 'America/Sao_Paulo',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+});
+
+/** Instante ISO 8601 → "05/09/2026 — 13h34" (horário de Brasília). */
+export function formatDateTime(iso: string): string {
+  const parts = Object.fromEntries(
+    DATE_TIME.formatToParts(new Date(iso)).map((p) => [p.type, p.value]),
+  );
+  return `${parts['day']}/${parts['month']}/${parts['year']} — ${parts['hour']}h${parts['minute']}`;
+}
+
+@Pipe({ name: 'dateTime' })
+export class DateTimePipe implements PipeTransform {
+  transform(iso: string | undefined | null): string {
+    return iso ? formatDateTime(iso) : '—';
+  }
+}

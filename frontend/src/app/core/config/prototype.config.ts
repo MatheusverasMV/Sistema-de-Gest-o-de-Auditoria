@@ -17,4 +17,8 @@ export const MOCK_LATENCY_MS = 280;
 export const STORAGE_KEYS = {
   persona: 'sga.persona',
   board: (boardId: string) => `sga.board.${boardId}.v1`,
+  /** Histórico de eventos do workflow (separado da sessão e dos quadros). */
+  workflow: 'sga.workflow.v1',
+  /** Cópia de segurança gravada antes de restaurar a demonstração. */
+  workflowBackup: 'sga.workflow.v1.backup',
 } as const;

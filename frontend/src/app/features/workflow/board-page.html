@@ -109,6 +109,8 @@
                   [card]="card"
                   [columnId]="column.id"
                   [workpaperLinked]="isWorkpaperLinked(card.workpaperId)"
+                  [formalStatus]="formalStatusOf(card)"
+                  [positionDiffers]="positionDiffers(card, column.id)"
                   (selected)="detailId.set($event.id)"
                 />
                 <div class="placeholder" *cdkDragPlaceholder></div>
@@ -163,6 +165,23 @@
         <dt>Prazo</dt>
         <dd class="mono">{{ card.dueDate | calendarDate }}</dd>
       </div>
+      @if (formalStatusOf(card); as formal) {
+        <div>
+          <dt>Status formal do PTA</dt>
+          <dd>
+            <sga-status-badge
+              [label]="workpaperStatusMeta[formal].label"
+              [tone]="workpaperStatusMeta[formal].tone"
+            />
+            @if (positionDiffers(card, detailColumn())) {
+              <p class="meta formal-note">
+                A coluna do cartão é organização do trabalho; o status formal só muda pelas ações do
+                PTA.
+              </p>
+            }
+          </dd>
+        </div>
+      }
       <div>
         <dt>Trabalho</dt>
         <dd>

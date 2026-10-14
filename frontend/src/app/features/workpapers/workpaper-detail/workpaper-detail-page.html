@@ -1,5 +1,22 @@
 @if (data.isLoading() && !data.value()) {
   <sga-card><sga-loading-state [rows]="8" label="Carregando papel de trabalho…" /></sga-card>
+} @else if (storageError(); as err) {
+  <sga-card>
+    <sga-empty-state
+      heading="Histórico de eventos ilegível"
+      [description]="err.message"
+      icon="database"
+      tone="danger"
+    >
+      <button sgaButton type="button" icon="rotate-ccw" (click)="data.reload()">
+        Tentar novamente
+      </button>
+      <button sgaButton variant="danger" type="button" icon="rotate-ccw" (click)="openReset()">
+        Restaurar demonstração…
+      </button>
+    </sga-empty-state>
+  </sga-card>
+  <ng-container *ngTemplateOutlet="dialogTpl" />
 } @else if (data.error()) {
   <sga-card>
     <sga-empty-state heading="Não foi possível carregar o PTA" icon="circle-alert" tone="danger">
@@ -40,17 +57,6 @@
           Executar Seleção de Amostras
         </a>
       }
-      <button
-        header-actions
-        sgaButton
-        variant="primary"
-        icon="send"
-        type="button"
-        [disabled]="!canSubmit()"
-        (click)="submitOpen.set(true)"
-      >
-        Enviar para revisão
-      </button>
     </sga-page-header>
 
     <dl class="meta-strip">
@@ -71,13 +77,60 @@
         <dd>{{ statusMeta[wp.status].label }}</dd>
       </div>
       <div>
+        <dt>Ciclo de revisão</dt>
+        <dd>
+          @if (currentCycle(); as c) {
+            Ciclo {{ c.sequence }} · {{ cycleResult[c.result].label.toLowerCase() }}
+          } @else {
+            Nenhum registrado
+          }
+        </dd>
+      </div>
+      <div>
         <dt>Última alteração</dt>
         <dd>{{ wp.updatedAt | relativeTime }}</dd>
       </div>
     </dl>
 
-    <sga-card>
+    <sga-card
+      heading="Fluxo formal de revisão"
+      subheading="Cada ação é registrada no histórico com autor, data e ciclo"
+    >
       <sga-workpaper-status-flow [status]="wp.status" />
+      @if (actions().length) {
+        <div class="wf-actions" role="group" aria-label="Ações do fluxo formal">
+          @for (a of actions(); track a.type) {
+            <button
+              sgaButton
+              type="button"
+              [variant]="a.type === 'create_note' || a.type === 'return' ? 'secondary' : 'primary'"
+              [icon]="actionIcon[a.type]"
+              [disabled]="!a.allowed"
+              [attr.aria-describedby]="a.allowed ? null : 'wf-reason-' + a.type"
+              (click)="openAction(a)"
+            >
+              {{ a.label }}
+            </button>
+          }
+        </div>
+        @if (blockedActions().length) {
+          <ul class="wf-reasons">
+            @for (a of blockedActions(); track a.type) {
+              <li [id]="'wf-reason-' + a.type">
+                <sga-icon name="lock" [size]="13" />
+                <span
+                  ><strong>{{ a.label }}:</strong> {{ a.reason }} {{ responsibleFor(a) }}</span
+                >
+              </li>
+            }
+          </ul>
+        }
+      } @else if (wp.status === 'finalized') {
+        <p class="wf-done">
+          <sga-icon name="shield-check" [size]="16" />
+          PTA finalizado. A aprovação está registrada no histórico.
+        </p>
+      }
     </sga-card>
 
     <div class="layout">
@@ -206,31 +259,47 @@
             </p>
           }
         </section>
+
+        <section id="historico" class="block">
+          <h2 class="block-title">
+            <span class="num">8</span>Histórico
+            <span class="meta title-meta"
+              >{{ state()?.events?.length ?? 0 }} evento(s) registrado(s)</span
+            >
+          </h2>
+          @if (state(); as st) {
+            <sga-workflow-history [state]="st" />
+          }
+          <div class="demo-reset">
+            <button
+              sgaButton
+              size="sm"
+              variant="ghost"
+              icon="rotate-ccw"
+              type="button"
+              (click)="openReset()"
+            >
+              Restaurar histórico de demonstração…
+            </button>
+          </div>
+        </section>
       </div>
 
       <aside class="side">
-        <sga-card heading="Revisão" [subheading]="openNotes() + ' ponto(s) em aberto'">
+        <sga-card heading="Revisão" [subheading]="openNotes().length + ' ponto(s) em aberto'">
           <div id="revisao" class="reviewer">
             <span class="meta">Revisor</span>
             <sga-person [userId]="wp.reviewerId" [showRole]="true" [size]="28" />
           </div>
-          <ul class="notes">
-            @for (note of wp.reviewNotes; track note.id) {
-              <li [class.resolved]="note.resolved">
-                <div class="note-head">
-                  <span class="strong">{{ people.nameOf(note.authorId) }}</span>
-                  <span class="meta">{{ note.date | relativeTime }}</span>
-                </div>
-                <p>{{ note.text }}</p>
-                <sga-status-badge
-                  [label]="note.resolved ? 'Resolvido' : 'Em aberto'"
-                  [tone]="note.resolved ? 'success' : 'warning'"
-                />
-              </li>
-            } @empty {
-              <li class="meta">Nenhum ponto de revisão registrado.</li>
-            }
-          </ul>
+          @if (state(); as st) {
+            <sga-review-notes-panel
+              [notes]="st.notes"
+              [cycles]="st.cycles"
+              [legacy]="wp.reviewNotes"
+              [resolvable]="resolvable()"
+              (resolve)="openResolve($event)"
+            />
+          }
         </sga-card>
 
         <sga-card heading="Nesta página">
@@ -250,55 +319,7 @@
     </div>
   </div>
 
-  <sga-drawer
-    heading="Enviar para revisão"
-    [subheading]="wp.id + ' · ' + wp.area"
-    [(open)]="submitOpen"
-    [width]="460"
-  >
-    <p class="drawer-intro">
-      O PTA seguirá para <strong>Aguardando revisão</strong> e ficará disponível na fila de
-      {{ people.nameOf(wp.reviewerId) }}.
-    </p>
-    <ul class="checklist">
-      <li [class.ok]="proceduresDone() === wp.procedures.length">
-        <sga-icon
-          [name]="proceduresDone() === wp.procedures.length ? 'circle-check' : 'circle-alert'"
-          [size]="18"
-        />
-        Procedimentos concluídos
-        <span class="meta">{{ proceduresDone() }} de {{ wp.procedures.length }}</span>
-      </li>
-      <li [class.ok]="wp.evidences.length > 0">
-        <sga-icon [name]="wp.evidences.length ? 'circle-check' : 'circle-alert'" [size]="18" />
-        Evidências anexadas <span class="meta">{{ wp.evidences.length }}</span>
-      </li>
-      <li [class.ok]="openNotes() === 0">
-        <sga-icon [name]="openNotes() === 0 ? 'circle-check' : 'circle-alert'" [size]="18" />
-        Pontos de revisão em aberto <span class="meta">{{ openNotes() }}</span>
-      </li>
-    </ul>
-    @if (proceduresDone() < wp.procedures.length) {
-      <p class="meta warn">
-        Há procedimentos pendentes. O revisor verá esse status ao abrir o PTA.
-      </p>
-    }
-    <button drawer-footer sgaButton variant="ghost" type="button" (click)="submitOpen.set(false)">
-      Cancelar
-    </button>
-    <button
-      drawer-footer
-      sgaButton
-      variant="primary"
-      icon="send"
-      type="button"
-      [loading]="submitting()"
-      [disabled]="submitting()"
-      (click)="submitForReview()"
-    >
-      Confirmar envio
-    </button>
-  </sga-drawer>
+  <ng-container *ngTemplateOutlet="dialogTpl" />
 } @else {
   <sga-card>
     <sga-empty-state
@@ -310,3 +331,182 @@
     </sga-empty-state>
   </sga-card>
 }
+
+<ng-template #dialogTpl>
+  <sga-drawer
+    [heading]="dialog()?.title ?? ''"
+    [subheading]="workpaper() ? workpaper()!.id + ' · ' + workpaper()!.area : 'Demonstração'"
+    [open]="dialog() !== null"
+    (openChange)="setDialogOpen($event)"
+    [width]="480"
+  >
+    @if (workpaper(); as wp) {
+      @switch (dialog()?.kind) {
+        @case ('start_preparation') {
+          <p class="drawer-intro">
+            O PTA passará para <strong>Em preparação</strong>.
+            @if (wp.status === 'with_issues') {
+              Corrija os pontos de revisão e marque-os como resolvidos antes de reenviar.
+            }
+          </p>
+        }
+        @case ('submit') {
+          <p class="drawer-intro">
+            O PTA seguirá para <strong>Aguardando revisão</strong> e abrirá o
+            <strong>ciclo {{ (state()?.cycles?.length ?? 0) + 1 }}</strong> na fila de
+            {{ people.nameOf(wp.reviewerId) }}.
+          </p>
+          <ul class="checklist">
+            <li [class.ok]="proceduresDone() === wp.procedures.length">
+              <sga-icon
+                [name]="proceduresDone() === wp.procedures.length ? 'circle-check' : 'circle-alert'"
+                [size]="18"
+              />
+              Procedimentos concluídos
+              <span class="meta">{{ proceduresDone() }} de {{ wp.procedures.length }}</span>
+            </li>
+            <li [class.ok]="wp.evidences.length > 0">
+              <sga-icon
+                [name]="wp.evidences.length ? 'circle-check' : 'circle-alert'"
+                [size]="18"
+              />
+              Evidências anexadas <span class="meta">{{ wp.evidences.length }}</span>
+            </li>
+            <li [class.ok]="openNotes().length === 0">
+              <sga-icon
+                [name]="openNotes().length === 0 ? 'circle-check' : 'circle-alert'"
+                [size]="18"
+              />
+              Pontos de revisão em aberto <span class="meta">{{ openNotes().length }}</span>
+            </li>
+          </ul>
+          @if (proceduresDone() < wp.procedures.length) {
+            <p class="meta warn">
+              Há procedimentos pendentes. O revisor verá esse status ao abrir o PTA.
+            </p>
+          }
+        }
+        @case ('start_review') {
+          <p class="drawer-intro">
+            A revisão formal do ciclo {{ currentCycle()?.sequence ?? 1 }} será iniciada em seu nome.
+            A partir daí você poderá registrar pontos, devolver ou aprovar.
+          </p>
+        }
+        @case ('create_note') {
+          <div class="form">
+            <sga-form-field label="Descrição do ponto" for="note-description">
+              <textarea
+                sgaInput
+                id="note-description"
+                rows="4"
+                [ngModel]="noteDescription()"
+                (ngModelChange)="noteDescription.set($event)"
+              ></textarea>
+            </sga-form-field>
+            <sga-form-field label="Severidade" for="note-severity">
+              <select
+                sgaInput
+                id="note-severity"
+                [ngModel]="noteSeverityValue()"
+                (ngModelChange)="noteSeverityValue.set($event)"
+              >
+                @for (option of severityOptions; track option) {
+                  <option [value]="option">{{ noteSeverity[option].label }}</option>
+                }
+              </select>
+            </sga-form-field>
+            <p class="meta">
+              Responsável pela correção: {{ people.nameOf(wp.preparerId) }}. Registrar o ponto não
+              devolve o PTA.
+            </p>
+          </div>
+        }
+        @case ('return') {
+          <p class="drawer-intro">
+            O ciclo {{ currentCycle()?.sequence }} será encerrado como <strong>devolvido</strong> e
+            o PTA voltará ao preparador com <strong>{{ openNotes().length }}</strong> ponto(s) em
+            aberto.
+          </p>
+          <sga-form-field
+            label="Justificativa da devolução"
+            for="return-reason"
+            [hint]="
+              openNotes().length
+                ? 'Opcional: os pontos em aberto já documentam a devolução.'
+                : 'Obrigatória: não há pontos registrados neste ciclo.'
+            "
+          >
+            <textarea
+              sgaInput
+              id="return-reason"
+              rows="3"
+              [ngModel]="returnReason()"
+              (ngModelChange)="returnReason.set($event)"
+            ></textarea>
+          </sga-form-field>
+        }
+        @case ('approve') {
+          <p class="drawer-intro">
+            A revisão do ciclo {{ currentCycle()?.sequence }} será <strong>aprovada</strong> e o PTA
+            <strong>finalizado</strong>, em uma única operação registrada em seu nome.
+          </p>
+          <ul class="checklist">
+            <li class="ok">
+              <sga-icon name="circle-check" [size]="18" />
+              Nenhum ponto de revisão em aberto
+            </li>
+          </ul>
+        }
+        @case ('resolve_note') {
+          @if (dialog()?.note; as note) {
+            <p class="drawer-intro">{{ note.description }}</p>
+            <sga-form-field label="Como foi resolvido" for="note-resolution" [optional]="true">
+              <textarea
+                sgaInput
+                id="note-resolution"
+                rows="3"
+                [ngModel]="resolution()"
+                (ngModelChange)="resolution.set($event)"
+              ></textarea>
+            </sga-form-field>
+            <p class="meta">
+              O ponto continua no histórico. Resolver não reenvia nem aprova o PTA.
+            </p>
+          }
+        }
+      }
+    }
+    @if (dialog()?.kind === 'reset') {
+      <p class="drawer-intro">
+        <strong>Recurso de demonstração.</strong> Todos os eventos registrados neste navegador (de
+        todos os PTAs) serão descartados e os PTAs voltarão aos status originais do protótipo. Uma
+        cópia de segurança do histórico atual será mantida. Quadros, sessão e preferências não são
+        alterados.
+      </p>
+    }
+    @if (dialogError(); as err) {
+      <p class="dialog-error" role="alert"><sga-icon name="circle-alert" [size]="16" />{{ err }}</p>
+    }
+    <button
+      drawer-footer
+      sgaButton
+      variant="ghost"
+      type="button"
+      [disabled]="busy()"
+      (click)="setDialogOpen(false)"
+    >
+      Cancelar
+    </button>
+    <button
+      drawer-footer
+      sgaButton
+      [variant]="dialog()?.kind === 'reset' || dialog()?.kind === 'return' ? 'danger' : 'primary'"
+      type="button"
+      [loading]="busy()"
+      [disabled]="busy()"
+      (click)="confirm()"
+    >
+      {{ dialog()?.kind === 'reset' ? 'Restaurar' : 'Confirmar' }}
+    </button>
+  </sga-drawer>
+</ng-template>

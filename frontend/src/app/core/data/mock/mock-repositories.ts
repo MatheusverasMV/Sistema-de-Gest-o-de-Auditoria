@@ -1,6 +1,16 @@
-import { EnvironmentProviders, Injectable, makeEnvironmentProviders } from '@angular/core';
-import { delay, Observable, of, throwError } from 'rxjs';
+import { EnvironmentProviders, inject, Injectable, makeEnvironmentProviders } from '@angular/core';
+import { catchError, defer, delay, map, Observable, of, throwError } from 'rxjs';
 import { MOCK_LATENCY_MS, prototypeNow, STORAGE_KEYS } from '../../config/prototype.config';
+import {
+  EMPTY_WORKFLOW_LOG,
+  nextSequence,
+  parseWorkflowLog,
+  serializeWorkflowLog,
+  WORKFLOW_STORAGE,
+  WorkflowLog,
+} from '../workflow-log';
+import { projectWorkpaper } from '../workflow-projection';
+import { WorkflowError } from '../workpaper-workflow';
 import { ACTIVITIES, NOTIFICATIONS } from '../../mocks/activity.mock';
 import { LEDGER_ANALYSES } from '../../mocks/analytics.mock';
 import {
@@ -36,7 +46,6 @@ import {
   Task,
   User,
   Workpaper,
-  WorkpaperStatus,
 } from '../../models';
 import {
   ActivityRepository,
@@ -49,6 +58,8 @@ import {
   ReferenceDataRepository,
   TaskRepository,
   UserRepository,
+  WorkflowAppend,
+  WorkflowRepository,
   WorkpaperRepository,
 } from '../repositories';
 
@@ -99,21 +110,110 @@ class MockEngagementRepository extends EngagementRepository {
   }
 }
 
-/** Mantém o estado em memória: alterações persistem durante a sessão e são descartadas no reload. */
+/**
+ * Histórico de eventos persistido no navegador (um documento versionado). Cada append grava
+ * o documento inteiro de uma vez: ou todos os eventos da operação entram, ou nenhum entra.
+ * Dados inválidos nunca são apagados automaticamente — só por restauração explícita.
+ */
+@Injectable()
+class MockWorkflowRepository extends WorkflowRepository {
+  private readonly storage = inject(WORKFLOW_STORAGE);
+
+  load(): Observable<WorkflowLog> {
+    return defer(() => of(this.read()));
+  }
+
+  append(change: WorkflowAppend): Observable<WorkflowLog> {
+    return defer(() => {
+      const current = this.read();
+      if (current.revision !== change.expectedRevision) {
+        throw new WorkflowError(
+          'conflict',
+          'O histórico foi alterado em outra janela. Recarregue a página e tente novamente.',
+        );
+      }
+      const ids = new Set(current.events.map((e) => e.id));
+      const lastSequence = nextSequence(current) - 1;
+      if (change.events.some((e) => ids.has(e.id) || e.sequence <= lastSequence)) {
+        throw new WorkflowError('conflict', 'Eventos com identificador ou sequência já usados.');
+      }
+      const baselines = { ...current.baselines };
+      for (const [id, baseline] of Object.entries(change.baselines ?? {})) {
+        baselines[id] ??= baseline;
+      }
+      const next: WorkflowLog = {
+        ...current,
+        revision: current.revision + 1,
+        baselines,
+        events: [...current.events, ...change.events],
+      };
+      this.write(next);
+      return of(next);
+    });
+  }
+
+  reset(): Observable<WorkflowLog> {
+    return defer(() => {
+      const raw = this.storage.getItem(STORAGE_KEYS.workflow);
+      if (raw !== null) {
+        this.storage.setItem(STORAGE_KEYS.workflowBackup, raw);
+      }
+      this.write(EMPTY_WORKFLOW_LOG);
+      return of(EMPTY_WORKFLOW_LOG);
+    });
+  }
+
+  private read(): WorkflowLog {
+    let raw: string | null;
+    try {
+      raw = this.storage.getItem(STORAGE_KEYS.workflow);
+    } catch {
+      throw new WorkflowError('storage_failure', 'Armazenamento local indisponível.');
+    }
+    const parsed = parseWorkflowLog(raw);
+    if (!parsed.ok) {
+      throw new WorkflowError(
+        'corrupted_storage',
+        `Histórico salvo inválido (${parsed.reason}). Os dados foram preservados; restaure a demonstração para continuar.`,
+      );
+    }
+    return parsed.log;
+  }
+
+  private write(log: WorkflowLog): void {
+    try {
+      this.storage.setItem(STORAGE_KEYS.workflow, serializeWorkflowLog(log));
+    } catch {
+      throw new WorkflowError('storage_failure', 'Não foi possível gravar o histórico.');
+    }
+  }
+}
+
+/**
+ * PTAs mantidos em memória (evidências da sessão). O status devolvido é o formal: projeção
+ * do histórico de eventos sobre o status herdado do mock. Sem histórico legível, vale o
+ * status herdado — a tela do PTA sinaliza o problema do histórico.
+ */
 @Injectable()
 class MockWorkpaperRepository extends WorkpaperRepository {
+  private readonly workflow = inject(WorkflowRepository);
   private workpapers: Workpaper[] = [...WORKPAPERS];
 
   list(): Observable<Workpaper[]> {
-    return respond([...this.workpapers]);
+    return this.projected().pipe(
+      map((project) => this.workpapers.map(project)),
+      delay(MOCK_LATENCY_MS),
+    );
   }
 
   get(id: string): Observable<Workpaper | null> {
-    return respond(this.workpapers.find((w) => w.id === id) ?? null);
-  }
-
-  updateStatus(id: string, status: WorkpaperStatus): Observable<Workpaper> {
-    return this.update(id, (w) => ({ ...w, status }));
+    return this.projected().pipe(
+      map((project) => {
+        const workpaper = this.workpapers.find((w) => w.id === id);
+        return workpaper ? project(workpaper) : null;
+      }),
+      delay(MOCK_LATENCY_MS),
+    );
   }
 
   addEvidence(
@@ -121,23 +221,30 @@ class MockWorkpaperRepository extends WorkpaperRepository {
     evidence: Evidence,
     completedProcedureId?: string,
   ): Observable<Workpaper> {
-    return this.update(id, (w) => ({
-      ...w,
-      evidences: [...w.evidences, evidence],
-      procedures: w.procedures.map((p) =>
-        p.id === completedProcedureId ? { ...p, done: true } : p,
-      ),
-    }));
-  }
-
-  private update(id: string, change: (w: Workpaper) => Workpaper): Observable<Workpaper> {
     const current = this.workpapers.find((w) => w.id === id);
     if (!current) {
       return notFound('PTA', id);
     }
-    const updated = { ...change(current), updatedAt: prototypeNow().toISOString() };
+    const updated: Workpaper = {
+      ...current,
+      evidences: [...current.evidences, evidence],
+      procedures: current.procedures.map((p) =>
+        p.id === completedProcedureId ? { ...p, done: true } : p,
+      ),
+      updatedAt: prototypeNow().toISOString(),
+    };
     this.workpapers = this.workpapers.map((w) => (w.id === id ? updated : w));
-    return respond(updated);
+    return this.projected().pipe(
+      map((project) => project(updated)),
+      delay(MOCK_LATENCY_MS),
+    );
+  }
+
+  private projected(): Observable<(workpaper: Workpaper) => Workpaper> {
+    return this.workflow.load().pipe(
+      map((log) => (workpaper: Workpaper) => projectWorkpaper(workpaper, log)),
+      catchError(() => of((workpaper: Workpaper) => workpaper)),
+    );
   }
 }
 
@@ -293,6 +400,7 @@ export function provideMockRepositories(): EnvironmentProviders {
     { provide: UserRepository, useClass: MockUserRepository },
     { provide: ReferenceDataRepository, useClass: MockReferenceDataRepository },
     { provide: EngagementRepository, useClass: MockEngagementRepository },
+    { provide: WorkflowRepository, useClass: MockWorkflowRepository },
     { provide: WorkpaperRepository, useClass: MockWorkpaperRepository },
     { provide: TaskRepository, useClass: MockTaskRepository },
     { provide: BoardRepository, useClass: MockBoardRepository },

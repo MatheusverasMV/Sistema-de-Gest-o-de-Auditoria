@@ -8,6 +8,8 @@ export * from './engagement.model';
 export * from './entity.model';
 export * from './external-reference.model';
 export * from './quality.model';
+export * from './review-cycle.model';
+export * from './review-note.model';
 export * from './status.model';
 export * from './task.model';
 export * from './user.model';
