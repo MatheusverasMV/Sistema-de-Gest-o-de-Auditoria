@@ -2,7 +2,8 @@ import { Component, computed, inject, input } from '@angular/core';
 import { initials, roleLabel } from '../../../core/models';
 import { PeopleService } from '../../../core/services/people.service';
 
-const PALETTE = ['#1F6B45', '#185238', '#3A8C5C', '#2E5E4E', '#46745A', '#123D2B'];
+/** Fundos oficiais AUDIMEC com iniciais em branco-esverdeado (13,2:1 e 4,7:1). */
+const PALETTE = ['var(--aud-verde-escuro)', 'var(--aud-verde-intermediario)'];
 
 @Component({
   selector: 'sga-avatar',
@@ -21,8 +22,8 @@ const PALETTE = ['#1F6B45', '#185238', '#3A8C5C', '#2E5E4E', '#46745A', '#123D2B
       justify-content: center;
       flex-shrink: 0;
       border-radius: 50%;
-      color: #fff;
-      font-weight: 600;
+      color: var(--text-on-brand);
+      font-weight: 700;
       letter-spacing: 0.02em;
       user-select: none;
     }

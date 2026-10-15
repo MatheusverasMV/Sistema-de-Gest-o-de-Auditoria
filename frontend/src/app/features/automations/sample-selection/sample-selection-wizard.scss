@@ -30,6 +30,7 @@
     flex-shrink: 0;
     border-radius: 50%;
     background: var(--surface-sunken);
+    color: var(--text-primary);
     font-size: 12px;
     font-weight: 600;
   }
@@ -45,7 +46,7 @@
 
   .current {
     border-color: var(--green-500);
-    background: var(--green-50);
+    background: var(--brand-subtle);
     color: var(--green-800);
 
     .marker {
@@ -117,7 +118,7 @@
 
   .active {
     color: var(--green-800);
-    font-weight: 500;
+    font-weight: 700;
   }
 }
 
@@ -183,7 +184,7 @@
     background: var(--green-50);
 
     strong {
-      color: var(--green-800);
+      color: var(--green-500);
     }
   }
 }
@@ -194,11 +195,11 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  border: 1px solid var(--green-200);
-  background: var(--green-50);
+  border: 1px solid var(--border);
+  background: var(--success-100);
 
   > sga-icon {
-    color: var(--green-700);
+    color: var(--success-700);
   }
 }
 

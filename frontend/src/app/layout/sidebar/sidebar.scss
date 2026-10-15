@@ -14,15 +14,19 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   height: var(--topbar-height);
-  padding: 0 var(--space-5);
+  // Área de não interferência do logotipo horizontal (≥ 0,79 × altura nas laterais).
+  padding: 0 var(--space-6);
   flex-shrink: 0;
   border-bottom: 1px solid rgb(255 255 255 / 8%);
-  color: #fff;
 
   &:hover {
     text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--text-on-brand);
+    outline-offset: -2px;
   }
 }
 
@@ -31,37 +35,16 @@
   padding: 0;
 }
 
+// Logotipo horizontal negativo: largura ≥ 151 px (mínimo oficial de 4 cm a 96 dpi), altura
+// pela proporção 5,4567 do arquivo. Nunca redimensionar só a altura.
 .logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 152px;
+  height: auto;
+}
+
+.symbol {
   width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: var(--radius-md);
-  background: var(--green-200);
-  color: var(--green-950);
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.2;
-}
-
-.brand-name {
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.04em;
-}
-
-.brand-sub {
-  font-size: 11px;
-  line-height: 1.3;
-  color: rgb(255 255 255 / 60%);
+  height: auto;
 }
 
 nav {
@@ -112,14 +95,15 @@ nav {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--green-200);
+    outline: 2px solid var(--accent);
     outline-offset: -2px;
   }
 
+  // Estado ativo: lima sobre o verde-escuro (8,2:1), como acento da marca.
   &.active {
-    background: var(--green-800);
+    background: rgb(167 207 0 / 12%);
     color: #fff;
-    box-shadow: inset 3px 0 0 var(--green-200);
+    box-shadow: inset 3px 0 0 var(--accent);
   }
 }
 
@@ -136,7 +120,7 @@ nav {
 }
 
 .restricted {
-  color: var(--green-200);
+  color: var(--accent);
 }
 
 .footer {

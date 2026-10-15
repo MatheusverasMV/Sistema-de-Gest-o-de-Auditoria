@@ -285,7 +285,7 @@ import { SEVERITY_META } from '../quality-ui';
       bottom: 0;
       left: 7px;
       width: 2px;
-      background: var(--green-200);
+      background: var(--border);
     }
     .chain__label {
       font-size: var(--fs-meta);
@@ -306,7 +306,7 @@ import { SEVERITY_META } from '../quality-ui';
       margin-top: 2px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--green-700);
+      color: var(--link);
     }
     .chain__note {
       display: inline-flex;
@@ -322,7 +322,7 @@ import { SEVERITY_META } from '../quality-ui';
       margin-bottom: var(--space-3);
       padding: var(--space-2) var(--space-3);
       border-radius: var(--radius-md);
-      background: var(--surface-sunken);
+      background: var(--surface-muted);
       font-size: 13px;
       color: var(--text-secondary);
     }

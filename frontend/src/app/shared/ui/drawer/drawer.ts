@@ -44,7 +44,7 @@ import { IconButton } from '../button/button';
       position: fixed;
       inset: 0;
       z-index: 900;
-      background: rgb(18 61 43 / 28%);
+      background: rgb(29 42 36 / 28%);
       animation: fade 150ms ease;
     }
     .panel {

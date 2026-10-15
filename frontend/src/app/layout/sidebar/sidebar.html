@@ -1,10 +1,21 @@
-<a class="brand" routerLink="/dashboard" aria-label="SGA — ir para o Dashboard">
-  <span class="logo" aria-hidden="true">S</span>
+<a
+  class="brand"
+  routerLink="/dashboard"
+  aria-label="AUDIMEC Auditores Independentes · SGA — ir para o Dashboard"
+>
+  <!-- Arquivos oficiais da Skill AUDIMEC-DESIGN, sem alteração (public/brand). -->
   @if (!collapsed()) {
-    <span class="brand-text">
-      <span class="brand-name">SGA</span>
-      <span class="brand-sub">Gestão e Automação de Auditoria</span>
-    </span>
+    <img
+      class="logo"
+      src="brand/audimec-logo-horizontal-negativa.svg"
+      alt=""
+      width="152"
+      height="28"
+    />
+  } @else {
+    <!-- Decisão D3 (provisória): símbolo de duas cores na sidebar recolhida, pendente de
+         validação institucional da AUDIMEC. -->
+    <img class="symbol" src="brand/audimec-simbolo-2cores.svg" alt="" width="32" height="23" />
   }
 </a>
 

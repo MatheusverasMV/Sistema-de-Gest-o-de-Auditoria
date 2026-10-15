@@ -84,7 +84,7 @@ import { TaskRow, TaskService } from './task.service';
     }
     .title.done {
       color: var(--text-secondary);
-      font-weight: 400;
+      font-weight: 300;
     }
     .overdue {
       color: var(--danger-700);

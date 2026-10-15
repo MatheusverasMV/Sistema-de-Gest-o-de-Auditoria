@@ -1,7 +1,7 @@
 .code-chip {
   padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--green-100);
+  background: var(--surface);
   color: var(--green-800);
   font-size: 13px;
   font-weight: 600;
@@ -113,7 +113,8 @@
 
 .check {
   display: inline-flex;
-  color: var(--warning-500);
+  // Lima não é legível como traço fino sobre branco: pendência em verde-escuro (forma distingue).
+  color: var(--warning-700);
 }
 
 .done .check {
@@ -275,7 +276,7 @@
   border-top: 1px solid var(--border);
 
   sga-icon {
-    color: var(--warning-500);
+    color: var(--warning-700);
   }
 
   &.ok sga-icon {

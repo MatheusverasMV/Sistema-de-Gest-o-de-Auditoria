@@ -525,7 +525,7 @@ export class AdjustmentsTab {
       color: var(--warning-700);
     }
     .checklist li.ok {
-      color: var(--green-700);
+      color: var(--success-700);
     }
     .checklist span:not(.meta) {
       color: var(--text-primary);

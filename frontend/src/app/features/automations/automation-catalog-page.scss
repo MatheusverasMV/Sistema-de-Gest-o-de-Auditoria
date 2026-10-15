@@ -49,6 +49,7 @@
   padding: 0 6px;
   border-radius: var(--radius-pill);
   background: var(--surface-sunken);
+  color: var(--text-primary);
   font-size: 11px;
   line-height: 18px;
 }
@@ -73,7 +74,7 @@
     box-shadow var(--transition-fast);
 
   &:hover {
-    border-color: var(--green-200);
+    border-color: var(--border-strong);
     box-shadow: var(--shadow-md);
   }
 }
@@ -99,7 +100,7 @@
   background: var(--surface-sunken);
   font-size: var(--fs-meta);
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .description {

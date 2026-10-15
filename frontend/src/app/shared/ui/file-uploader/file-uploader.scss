@@ -21,7 +21,7 @@
 
   &:hover,
   &.dragging {
-    border-color: var(--green-500);
+    border-color: var(--brand);
     background: var(--green-50);
   }
 
@@ -48,7 +48,7 @@
 }
 
 .link {
-  color: var(--brand);
+  color: var(--link);
   text-decoration: underline;
 }
 
@@ -64,7 +64,7 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--green-200);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--green-50);
 }

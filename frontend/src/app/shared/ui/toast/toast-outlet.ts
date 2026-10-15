@@ -49,7 +49,7 @@ const TONE_ICON = { success: 'circle-check', info: 'info', danger: 'circle-alert
       animation: rise 160ms ease-out;
     }
     .toast--success sga-icon {
-      color: var(--green-200);
+      color: var(--accent);
     }
     .toast--danger {
       background: var(--danger-700);
@@ -57,8 +57,13 @@ const TONE_ICON = { success: 'circle-check', info: 'info', danger: 'circle-alert
     .message {
       flex: 1;
     }
-    button {
-      color: rgb(255 255 255 / 80%);
+    /* Especificidade acima do .btn--ghost compartilhado, que usaria texto escuro sobre o toast. */
+    .toast button {
+      color: var(--text-on-brand);
+    }
+    .toast button:hover {
+      background: rgb(241 242 236 / 12%);
+      color: var(--text-on-brand);
     }
     @keyframes rise {
       from {

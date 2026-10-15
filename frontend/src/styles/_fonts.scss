@@ -1,0 +1,36 @@
+// Exo 2 — tipografia oficial AUDIMEC (manual de marca p. 09), incorporada a partir dos
+// arquivos da Skill AUDIMEC-DESIGN v1.1.0 (public/fonts/exo2, licença SIL OFL 1.1).
+// Pesos: 300 Light (H2 / rótulos de seção), 500 Medium (texto), 800 ExtraBold (H1) — oficiais;
+// 700 Bold — adaptação da Skill para ênfase no corpo. Não há 400 nem 600: o navegador
+// resolve 400 para 500 e 600 para 700.
+@font-face {
+  font-family: 'Exo 2';
+  src: url('/fonts/exo2/Exo2-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  src: url('/fonts/exo2/Exo2-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  src: url('/fonts/exo2/Exo2-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  src: url('/fonts/exo2/Exo2-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}

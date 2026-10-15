@@ -72,7 +72,7 @@ export interface TabItem {
       background: var(--surface-sunken);
       font-size: 11px;
       line-height: 18px;
-      color: var(--text-secondary);
+      color: var(--text-primary);
     }
   `,
 })

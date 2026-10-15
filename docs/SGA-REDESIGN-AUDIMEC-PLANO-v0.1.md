@@ -311,6 +311,31 @@ A Skill v1.1.0 está instalada e foi lida.
 | **D3** | Sidebar recolhida (72 px) | Usar o **símbolo 2 cores** (arquivo oficial). A marca completa aparece no estado expandido, que é o padrão acima de 1200 px. **Validar com a AUDIMEC** | O logotipo horizontal não cabe com o mínimo de 151 px; recriar ou reduzir é proibido |
 | **D4** | Raio | 4 px em cards, campos e botões; 2 px em selos; círculo só em avatares e contadores | Equilíbrio entre o raio 0 do tema HTML da Skill e o conforto visual de componentes interativos |
 
+### 6.4. Decisões aprovadas (14/10/2026)
+
+A direção "institucional sóbrio" foi aprovada, assim como as decisões abaixo.
+
+| # | Situação | Texto aprovado |
+|---|---|---|
+| **D1** | Aprovada | Paleta institucional da AUDIMEC. O vermelho permanece como exceção para erros e alarmes críticos. O verde-lima representa atenção, respeitando contraste, acessibilidade e distinção por forma ou texto |
+| **D2** | Aprovada | Caixa alta apenas em rótulos curtos de seção. Títulos de páginas e componentes em escrita normal |
+| **D3** | **Aprovada provisoriamente** | Símbolo oficial de duas cores na sidebar recolhida, desde que mantenha legibilidade e contraste e sem modificar o logotipo. **Esta aplicação depende de validação institucional da AUDIMEC** |
+| **D4** | Aprovada | Raio de 4 px para cards, campos e botões e de 2 px para selos, preservando exceções funcionais justificadas |
+
+**Nota técnica sobre D3.** O símbolo de duas cores combina `#A7CF00` (8,2:1 sobre `#1D2A24`) e `#3E7566` (2,8:1 sobre `#1D2A24`). É a mesma composição de cores que o logotipo horizontal negativo oficial aplica sobre o verde-escuro (manual p. 08), ou seja, o símbolo não é recolorido nem adaptado. Na sidebar recolhida ele aparece sem a marca completa ao lado, e é esse o ponto que depende da validação institucional (regra do símbolo isolado, manual p. 07).
+
+**Favicon (Fase 1, mesma dependência de D3).** A Skill não traz favicon oficial. O favicon padrão do Angular foi substituído pelo arquivo oficial `audimec-simbolo-2cores.svg`, sem alteração: o navegador encaixa o viewBox (1,41:1) no quadrado, sem distorção. É outro uso do símbolo isolado, então também depende da validação institucional. Navegadores sem suporte a favicon SVG mostram o ícone genérico. Um favicon rasterizado (.ico/.png quadrado) deve ser solicitado à AUDIMEC, não derivado pela equipe.
+
+**Correção do risco R1** (medido em 14/10/2026). A Exo 2 **não** é mais larga que a Inter:
+
+| Comparação | Medida |
+|---|---|
+| Exo 2 Medium 14 px × Inter Regular 14 px | 3% a 10% mais estreita em textos típicos da interface |
+| KPI "R$ 186 mil", 28 px | 136,6 px (Exo 2 ExtraBold) × 138,1 px (Inter SemiBold) |
+| Altura de x | 0,49 em × 0,55 em, cerca de 11% menor |
+
+O risco real é a legibilidade de textos de 10 a 12 px. Os algarismos tabulares funcionam com `font-variant-numeric: tabular-nums`; o padrão da fonte é proporcional.
+
 ---
 
 ## 7. Design System planejado

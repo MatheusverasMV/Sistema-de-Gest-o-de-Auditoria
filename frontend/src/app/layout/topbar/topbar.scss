@@ -8,6 +8,15 @@
   border-bottom: 1px solid var(--border);
 }
 
+.product {
+  font-size: var(--fs-small);
+  font-weight: var(--fw-light);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .search {
   position: relative;
   flex: 1;
@@ -44,7 +53,8 @@
 
   &:hover,
   &[aria-expanded='true'] {
-    background: var(--surface-sunken);
+    // #F1F2EC mantém o cargo (#3E7566) acima de 4,5:1 no realce.
+    background: var(--surface-muted);
   }
 }
 
@@ -165,6 +175,12 @@
 @media (max-width: 900px) {
   .user-text,
   .chevron {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .product {
     display: none;
   }
 }

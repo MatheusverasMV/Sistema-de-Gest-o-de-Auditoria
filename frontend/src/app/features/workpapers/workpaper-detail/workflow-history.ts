@@ -165,7 +165,7 @@ interface TimelineItem {
       gap: var(--space-2);
       padding: var(--space-3);
       border-radius: var(--radius-md);
-      background: var(--surface-sunken);
+      background: var(--surface-muted);
       color: var(--text-secondary);
       font-size: 13px;
     }

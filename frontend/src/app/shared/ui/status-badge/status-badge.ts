@@ -46,7 +46,7 @@ import { StatusTone } from '../../../core/models';
     }
     :host(.badge--brand) {
       background: var(--green-950);
-      color: var(--green-100);
+      color: var(--text-on-brand);
     }
   `,
 })
