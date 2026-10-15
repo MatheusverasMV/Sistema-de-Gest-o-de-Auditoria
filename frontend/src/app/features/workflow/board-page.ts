@@ -172,6 +172,12 @@ export default class BoardPage {
     return !!workpaperId && !!this.selectedSummary()?.linkedWorkpaperIds.has(workpaperId);
   }
 
+  /** PTA vinculado e existente do cartão aberto (atalho "Abrir PTA" no rodapé do drawer). */
+  protected readonly linkedWorkpaperId = computed(() => {
+    const id = this.detailCard()?.workpaperId;
+    return this.isWorkpaperLinked(id) ? id : undefined;
+  });
+
   protected selectBoard(id: string): void {
     this.selectedId.set(id);
     this.router.navigate([], {

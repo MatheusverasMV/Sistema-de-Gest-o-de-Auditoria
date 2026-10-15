@@ -20,11 +20,11 @@
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
   background: var(--surface);
-  font-weight: 500;
+  font-weight: var(--fw-body);
   color: var(--text-secondary);
 
   &:hover {
-    border-color: var(--green-500);
+    border-color: var(--text-secondary);
   }
 
   &[aria-pressed='true'] {
@@ -51,11 +51,12 @@
   align-items: start;
 }
 
+// Coluna discreta: organiza os cartões sem competir com eles (fundo da página + fio).
 .column {
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-lg);
-  background: var(--surface-sunken);
+  background: var(--surface-muted);
   border: 1px solid var(--border);
 }
 
@@ -67,27 +68,30 @@
 
   h2 {
     flex: 1;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-strong);
+    color: var(--text-primary);
   }
 }
 
+// Marcador da coluna na mesma linguagem de forma dos selos (vazado, meio cheio, cheio).
 .dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 1px;
 }
 
 .dot--neutral {
-  background: var(--neutral-700);
+  box-shadow: inset 0 0 0 1.5px var(--text-secondary);
 }
 
 .dot--info {
-  background: var(--info-500);
+  background: linear-gradient(90deg, var(--info-500) 50%, transparent 50%);
+  box-shadow: inset 0 0 0 1.5px var(--info-500);
 }
 
 .dot--brand {
-  background: var(--green-700);
+  background: var(--brand);
 }
 
 .dot--warning {
@@ -100,16 +104,18 @@
 }
 
 .dot--success {
-  background: var(--green-500);
+  background: var(--text-secondary);
 }
 
 .count {
-  padding: 0 7px;
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
+  min-width: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  text-align: center;
   color: var(--text-secondary);
 }
 
@@ -123,7 +129,7 @@
 
 .drop-list.cdk-drop-list-receiving,
 .drop-list.cdk-drop-list-dragging {
-  background: var(--green-50);
+  background: var(--brand-subtle);
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
@@ -137,9 +143,9 @@
 
 .placeholder {
   min-height: 96px;
-  border: 2px dashed var(--green-500);
+  border: 2px dashed var(--text-secondary);
   border-radius: var(--radius-md);
-  background: var(--green-100);
+  background: var(--brand-subtle);
 }
 
 .empty-col {
@@ -147,7 +153,7 @@
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-md);
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-meta);
   color: var(--text-muted);
 }
 
@@ -163,7 +169,7 @@
   }
 
   dt {
-    font-size: 13px;
+    font-size: var(--fs-small);
     color: var(--text-secondary);
   }
 
@@ -181,7 +187,7 @@
 .tag {
   padding: 0 8px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   font-size: 12px;
   line-height: 20px;
 }
@@ -192,11 +198,11 @@
   margin-top: var(--space-5);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--green-50);
+  background: var(--surface-muted);
   border: 1px solid var(--border);
 
   > sga-icon {
-    color: var(--green-700);
+    color: var(--text-primary);
     margin-top: 2px;
   }
 }

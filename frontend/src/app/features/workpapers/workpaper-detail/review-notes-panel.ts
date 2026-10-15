@@ -83,10 +83,10 @@ import { Button, StatusBadge } from '../../../shared/ui';
     }
   `,
   styles: `
+    /* Pontos como linhas de lista (fio superior), sem caixa por item. */
     .notes {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
       margin: 0;
       padding: 0;
       list-style: none;
@@ -96,30 +96,33 @@ import { Button, StatusBadge } from '../../../shared/ui';
       flex-direction: column;
       align-items: flex-start;
       gap: var(--space-1);
-      padding: var(--space-3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      font-size: 13px;
+      padding: var(--space-3) 0;
+      border-top: 1px solid var(--border);
+      font-size: var(--fs-small);
     }
-    .notes li.resolved {
-      background: var(--surface-muted);
+    .notes li.resolved p {
+      color: var(--text-secondary);
     }
     .note-head {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: var(--space-2);
+      gap: var(--space-2) var(--space-3);
+    }
+    .strong {
+      font-weight: var(--fw-strong);
     }
     .resolution {
       color: var(--success-700);
     }
+    /* Registros herdados: seção própria, rótulo Light caixa alta (D2). */
     .sub {
-      margin-top: var(--space-4);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
+      margin-top: var(--space-5);
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-light);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
     .sub + .meta {
       margin-bottom: var(--space-2);

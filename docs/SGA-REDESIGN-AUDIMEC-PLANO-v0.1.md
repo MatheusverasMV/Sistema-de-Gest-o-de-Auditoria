@@ -642,6 +642,7 @@ Nada do que sustenta a leitura estatística é removido: série, LC, LSC/LIC, fa
   - teclado: pular para o conteúdo, navegar e fechar a gaveta com Esc;
   - o teste `sidebar.spec.ts` continua passando;
   - sem overflow em 390 px na moldura.
+- **Execução (15/10/2026).** Itens 1 e 2 implementados: grupos em Light caixa alta separados por espaçamento, item ativo com barra lima, nome acessível com a restrição na sidebar recolhida, busca sem borda em repouso, contador de notificações neutro e menu do usuário com identidade → cargo → opções. Por decisão de escopo da Fase 2, o item 3 (gaveta móvel) foi adiado para a Fase 6 e o item 4 (`page-header` e `breadcrumb`) para a Fase 3.
 
 ### Fase 3 — Componentes compartilhados · **P0/P1**
 
@@ -658,6 +659,27 @@ Nada do que sustenta a leitura estatística é removido: série, LC, LSC/LIC, fa
   - nenhum `radius-pill` fora de avatar, contador e `tag`;
   - nenhum `font-weight: 600`;
   - estados de hover, foco, ativo e desabilitado conferidos em cada componente.
+- **Execução (15/10/2026).** Escopo limitado a `shared/ui`, aos estilos globais e ao `layout`. As páginas só receberam atributos ou raios onde isso era necessário para usar o componente compartilhado.
+  - **Feito.**
+    - Todos os componentes da seção 7.B, exceto `avatar` e `icon`, que já estavam no padrão.
+    - Token `--focus-color`, usado por `--focus-ring`, pelo `:focus-visible` global, pelos campos e pelas linhas de tabela.
+    - Nenhum `--green-*`, hexadecimal ou peso numérico em `shared/ui`, `layout` e `styles` (fora de `_tokens.scss`).
+  - **Selo (`status-badge`).**
+    - Raio de 2 px. Sem fundo por padrão: o marcador muda de forma conforme o tom (vazado = neutro, meio cheio = informativo, cheio escuro = em andamento, ✓ = concluído).
+    - Fundo só em atenção (lima), alarme (vermelho) e risco.
+    - Novo `input` opcional `kind` (`status` | `priority` | `risk`), que muda só a apresentação.
+  - **Mudança no item 3.** Em vez de alterar `PRIORITY_META` (modelo), as telas passam `kind="priority"`. "Alta" vira marcador escuro em negrito, sem vermelho. `kind="risk"` aplica a escala `--risk-*`. Severidade de ponto de revisão e de exceção continua vermelha, porque é achado, não prioridade.
+  - **KPI.** Sem bloco de ícone: ícone de 16 px ao lado do rótulo e marcador de 8 px junto ao valor nos tons de atenção e alarme.
+    - Rótulo mantido em caixa normal: em caixa alta, "PTAs" viraria "PTAS".
+    - A variante `emphasis` não foi criada, por falta de uso real.
+  - **Pílulas locais.** As 12 que funcionam como selo ou tag passaram para `--radius-sm`; o chip de filtro de Automações, que é botão, passou para `--radius-md`. Composição e cores locais ficam para as Fases 4 e 5.
+  - **Adiado.**
+    - Itens 2 e 5 (`shared/ui/tag` e a troca das pílulas): evitada uma abstração nova nesta fase.
+    - Item 4: 68 usos de `--green-*` em 17 arquivos de features. Os aliases ficam até essas páginas serem migradas.
+    - `font-weight: 600` em 17 arquivos de features.
+    - Paleta interna das cartas de controle (Fase 5).
+    - Composição dos cartões do Kanban (Fase 4).
+  - **Limitação conhecida.** `--risk-medium-bg` (lima pleno) é hoje o selo mais chamativo das tabelas, mais que "Alto". Rever na Fase 4 com a densidade de selos por linha.
 
 ### Fase 4 — Páginas principais · **P1**
 
@@ -672,6 +694,39 @@ Nada do que sustenta a leitura estatística é removido: série, LC, LSC/LIC, fa
   - no máximo 1 selo colorido por linha ou cartão;
   - overflow zero em 390 px no PTA;
   - jornadas do 02A (envio → aprovação) e arrastar no Kanban funcionando como antes.
+- **Execução (15/10/2026).** Dashboard, Trabalhos, Tarefas, PTAs, Kanban e Automações. Só templates, SCSS e computeds de apresentação; serviços, modelos, dados, workflow e permissões intocados.
+  - **Feito.**
+    - **Dashboard:** KPIs numa faixa única (utilitário global `.kpi-strip`, também usado na visão geral do Trabalho). "Automações recentes" foi para a coluna esquerda e perdeu o bloco de ícone. Datas tabulares; "atrasada" é o único vermelho das tarefas.
+    - **Trabalhos:** rótulos dos metadados do cabeçalho em Light caixa alta; números da materialidade em ExtraBold tabular.
+    - **Tarefas:** sem o ícone redundante com a coluna "Situação".
+    - **Tabela de PTAs:** só a área em negrito.
+    - **PTA.**
+      - Cabeçalho: código como rótulo neutro ao lado do status; "Status" saiu da faixa de metadados, porque repetia o selo.
+      - Seções: numeração Light 18 sem quadrado.
+      - Procedimentos: pendente com círculo vazio (ícone `circle`, da mesma biblioteca).
+      - Exceções, evidências e pontos de revisão: linhas de lista, sem caixas, fundos ou blocos de ícone.
+      - "Devolver": secundário com texto vermelho.
+      - Fluxo formal: etapa atual com anel lima.
+      - Histórico: marcadores vazados de 24 px num trilho de 1 px.
+    - **Kanban.**
+      - Colunas em `#F1F2EC` com fio. Marcador da coluna na linguagem de forma dos selos; contador como rótulo.
+      - Cartão: tipo em texto, tags como texto separado por "·", sem o selo de coluna (que continua no `aria-label`). "PTA: <status>" sempre visível, em lima apenas quando diverge da coluna.
+      - No drawer, "Status" virou "Coluna do quadro".
+    - **Automações.**
+      - Catálogo sem bloco de ícone; categoria como rótulo; cartões sem hover (só o botão é clicável).
+      - Aviso único sobre a v0.2 e selo "Em breve" no lugar do texto repetido em cada cartão.
+      - Assistente com etapas no padrão do fluxo do PTA; números do resultado em ExtraBold tabular.
+    - **Escala de risco.** Baixo `#F1F2EC` (quase neutro), Moderado em tinta de lima com marcador lima, Alto em `#3E7566` pleno. Ajuste feito nos tokens `--risk-*` e no selo.
+    - **Card compartilhado.** O corpo `flush` sem cabeçalho não deixa mais 12 px vazios acima da tabela.
+    - **Tokens.** Nenhum `--green-*`, `font-weight: 600` ou `radius-pill` restante nos módulos desta fase. A troca seguiu o papel de cada propriedade e preserva os valores.
+  - **Corrigido (já existia).** No drawer do Kanban, "Abrir PTA" era renderizado no corpo e não no rodapé: dois `@if` aninhados impediam a projeção. Agora é uma condição única.
+  - **Não feito, com justificativa.**
+    - Barra empilhada da "Situação dos PTAs": criaria uma segunda codificação de cor, em conflito com os marcadores dos selos. A lista com selos neutros e contagem já cumpre o objetivo.
+    - Limitar a "Atividade" a 5 itens: removeria informação e não há tela de destino para "Ver tudo".
+    - Link só no código do objeto na atividade: exigiria mudar o formato dos dados.
+    - Componente `tag`: os rótulos neutros ficaram em CSS local, de 3 linhas cada.
+  - **Responsivo (390 px).** PTA de 32 para 19 px, Seleção de Amostras de 31 para 15 px. O critério "overflow zero no PTA" segue pendente para a Fase 6.
+  - **Restam 11 usos de `--green-*`** em 5 arquivos de Qualidade e Análise de Dados (Fase 5). Por isso os aliases ficam.
 
 ### Fase 5 — Páginas analíticas · **P1**
 

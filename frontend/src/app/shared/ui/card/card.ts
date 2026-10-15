@@ -12,7 +12,7 @@ import { Component, input } from '@angular/core';
         <div class="card__titles">
           <h2 class="card-title" [id]="headingId">{{ heading() }}</h2>
           @if (subheading()) {
-            <p class="meta">{{ subheading() }}</p>
+            <p class="card__subtitle">{{ subheading() }}</p>
           }
         </div>
         <div class="card__actions"><ng-content select="[card-actions]" /></div>
@@ -34,7 +34,6 @@ import { Component, input } from '@angular/core';
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
     }
     .card__header {
       display: flex;
@@ -44,7 +43,14 @@ import { Component, input } from '@angular/core';
       padding: var(--space-4) var(--space-5) 0;
     }
     .card__titles {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
       min-width: 0;
+    }
+    .card__subtitle {
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
     }
     .card__actions {
       display: flex;
@@ -61,6 +67,10 @@ import { Component, input } from '@angular/core';
     }
     .card__body--flush {
       padding: var(--space-3) 0 0;
+    }
+    /* Sem cabeçalho, o conteúdo de borda a borda (ex.: tabela) começa no topo do card. */
+    .card__body--flush:first-child {
+      padding-top: 0;
     }
   `,
 })

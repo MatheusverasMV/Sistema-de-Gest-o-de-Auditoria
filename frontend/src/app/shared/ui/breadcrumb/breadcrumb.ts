@@ -18,7 +18,7 @@ export interface BreadcrumbItem {
           <li>
             @if (item.link && !last) {
               <a [routerLink]="item.link" [queryParams]="item.queryParams">{{ item.label }}</a>
-              <sga-icon name="chevron-right" [size]="14" />
+              <sga-icon name="chevron-right" [size]="12" class="separator" />
             } @else {
               <span [attr.aria-current]="last ? 'page' : null">{{ item.label }}</span>
             }
@@ -27,29 +27,34 @@ export interface BreadcrumbItem {
       </ol>
     </nav>
   `,
+  // Trilha discreta: links em verde-intermediário, item atual em verde-escuro, separador leve.
   styles: `
     ol {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: var(--space-1);
-      font-size: 13px;
+      gap: var(--space-1) var(--space-2);
+      font-size: var(--fs-small);
+      line-height: 1.4;
       color: var(--text-secondary);
     }
     li {
       display: inline-flex;
       align-items: center;
-      gap: var(--space-1);
+      gap: var(--space-2);
+      min-width: 0;
     }
     a {
-      color: var(--text-secondary);
+      color: var(--link);
     }
     a:hover {
-      color: var(--brand);
+      color: var(--text-primary);
+    }
+    .separator {
+      color: var(--border-strong);
     }
     [aria-current] {
       color: var(--text-primary);
-      font-weight: 500;
     }
   `,
 })

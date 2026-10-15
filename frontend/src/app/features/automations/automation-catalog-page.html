@@ -38,11 +38,18 @@
         tone="danger"
     /></sga-card>
   } @else {
+    @if (unavailableCount()) {
+      <p class="catalog-note meta">
+        <sga-icon name="info" [size]="14" />
+        Automações marcadas como "Em breve" já estão catalogadas; o fluxo de execução está previsto
+        para a v0.2.
+      </p>
+    }
     <ul class="catalog">
       @for (a of filtered(); track a.id) {
         <li class="tool">
           <div class="tool-head">
-            <span class="tool-icon"><sga-icon [name]="a.icon" [size]="20" /></span>
+            <sga-icon class="tool-icon" [name]="a.icon" [size]="20" />
             <span class="category">{{ a.category }}</span>
           </div>
           <h2 class="card-title">{{ a.name }}</h2>
@@ -59,7 +66,7 @@
           </dl>
           <div class="tool-foot">
             @if (!a.available) {
-              <span class="meta soon">Fluxo previsto para a v0.2</span>
+              <sga-status-badge class="soon" label="Em breve" tone="neutral" />
             }
             <a
               sgaButton

@@ -3,6 +3,10 @@ import { Icon } from '../icon/icon';
 
 export type KpiTone = 'neutral' | 'warning' | 'danger';
 
+/**
+ * Indicador tipográfico: o número é o protagonista. O ícone fica pequeno e sem bloco ao lado do
+ * rótulo; o tom vira um marcador junto ao valor, sempre acompanhado do rótulo e da dica (nunca só cor).
+ */
 @Component({
   selector: 'sga-kpi-card',
   imports: [Icon],
@@ -10,16 +14,21 @@ export type KpiTone = 'neutral' | 'warning' | 'danger';
     <div class="top">
       <span class="label">{{ label() }}</span>
       @if (icon()) {
-        <span class="icon"><sga-icon [name]="icon()!" [size]="18" /></span>
+        <sga-icon class="icon" [name]="icon()!" [size]="16" />
       }
     </div>
     @if (loading()) {
       <span class="skeleton" aria-label="Carregando"></span>
     } @else {
-      <span class="value">{{ value() }}</span>
+      <span class="value-line">
+        @if (tone() !== 'neutral') {
+          <span class="marker" aria-hidden="true"></span>
+        }
+        <span class="value">{{ value() }}</span>
+      </span>
     }
     @if (hint()) {
-      <span class="meta hint">{{ hint() }}</span>
+      <span class="hint">{{ hint() }}</span>
     }
   `,
   host: { '[class]': "'kpi kpi--' + tone()" },
@@ -32,40 +41,53 @@ export type KpiTone = 'neutral' | 'warning' | 'danger';
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
       min-width: 0;
     }
     .top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: var(--space-2);
     }
     .label {
-      font-size: 13px;
-      font-weight: 500;
+      font-size: var(--fs-small);
       color: var(--text-secondary);
     }
     .icon {
-      display: inline-flex;
-      padding: 6px;
-      border-radius: var(--radius-md);
-      background: var(--green-50);
-      color: var(--green-700);
+      margin-top: 1px;
+      color: var(--text-secondary);
     }
     :host(.kpi--warning) .icon {
-      background: var(--warning-100);
       color: var(--warning-700);
     }
     :host(.kpi--danger) .icon {
-      background: var(--danger-100);
       color: var(--danger-700);
     }
+    .value-line {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
     .value {
-      font-size: 28px;
-      font-weight: 600;
+      font-size: var(--fs-kpi);
+      font-weight: var(--fw-display);
+      font-variant-numeric: tabular-nums;
       line-height: 1.2;
-      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .marker {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 1px;
+    }
+    :host(.kpi--warning) .marker {
+      background: var(--warning-500);
+      box-shadow: inset 0 0 0 1px var(--warning-700);
+    }
+    :host(.kpi--danger) .marker {
+      background: var(--danger-500);
     }
     .skeleton {
       display: block;
@@ -76,6 +98,8 @@ export type KpiTone = 'neutral' | 'warning' | 'danger';
     }
     .hint {
       overflow: hidden;
+      font-size: var(--fs-meta);
+      color: var(--text-secondary);
       text-overflow: ellipsis;
       white-space: nowrap;
     }

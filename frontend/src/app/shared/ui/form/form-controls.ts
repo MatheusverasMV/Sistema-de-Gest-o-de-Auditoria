@@ -31,11 +31,12 @@ export class FormInput {}
       min-width: 0;
     }
     label {
-      font-size: 13px;
-      font-weight: 500;
+      font-size: var(--fs-small);
+      font-weight: var(--fw-body);
+      color: var(--text-primary);
     }
     .optional {
-      font-weight: 400;
+      font-weight: var(--fw-light);
       color: var(--text-muted);
     }
   `,
@@ -70,7 +71,7 @@ export class FormField {
     .icon {
       position: absolute;
       top: 50%;
-      left: 10px;
+      left: 11px;
       transform: translateY(-50%);
       color: var(--text-muted);
       pointer-events: none;

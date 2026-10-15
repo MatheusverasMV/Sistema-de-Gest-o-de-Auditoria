@@ -73,10 +73,6 @@
         <dd class="mono">{{ wp.date | calendarDate }}</dd>
       </div>
       <div>
-        <dt>Status</dt>
-        <dd>{{ statusMeta[wp.status].label }}</dd>
-      </div>
-      <div>
         <dt>Ciclo de revisão</dt>
         <dd>
           @if (currentCycle(); as c) {
@@ -104,6 +100,7 @@
               sgaButton
               type="button"
               [variant]="a.type === 'create_note' || a.type === 'return' ? 'secondary' : 'primary'"
+              [class.action-return]="a.type === 'return'"
               [icon]="actionIcon[a.type]"
               [disabled]="!a.allowed"
               [attr.aria-describedby]="a.allowed ? null : 'wf-reason-' + a.type"
@@ -164,7 +161,7 @@
                   [attr.aria-label]="proc.done ? 'Concluído' : 'Pendente'"
                   role="img"
                 >
-                  <sga-icon [name]="proc.done ? 'circle-check' : 'circle-alert'" [size]="18" />
+                  <sga-icon [name]="proc.done ? 'circle-check' : 'circle'" [size]="18" />
                 </span>
                 <span class="proc-id mono">{{ proc.id }}</span>
                 <span class="proc-text">{{ proc.description }}</span>
@@ -223,9 +220,12 @@
           <ul class="evidences">
             @for (ev of wp.evidences; track ev.id) {
               <li [class.highlight]="ev.id === highlight()">
-                <span class="ev-icon" [class.auto]="ev.kind === 'automation'">
-                  <sga-icon [name]="ev.kind === 'automation' ? 'zap' : 'paperclip'" [size]="16" />
-                </span>
+                <sga-icon
+                  class="ev-icon"
+                  [class.auto]="ev.kind === 'automation'"
+                  [name]="ev.kind === 'automation' ? 'zap' : 'paperclip'"
+                  [size]="16"
+                />
                 <span class="ev-text">
                   <span class="ev-name">
                     {{ ev.name }}

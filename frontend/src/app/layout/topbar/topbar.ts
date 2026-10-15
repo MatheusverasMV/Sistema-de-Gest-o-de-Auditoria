@@ -5,7 +5,7 @@ import {
   CdkMenuItemRadio,
   CdkMenuTrigger,
 } from '@angular/cdk/menu';
-import { Component, computed, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -40,6 +40,8 @@ export class Topbar {
   private readonly toast = inject(ToastService);
   private readonly notificationService = inject(NotificationService);
 
+  /** Estado da sidebar, para o rótulo e o aria-expanded do botão que a recolhe. */
+  readonly sidebarCollapsed = input(false);
   readonly toggleSidebar = output<void>();
 
   protected readonly user = this.session.currentUser;

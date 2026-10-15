@@ -6,7 +6,7 @@ import { Icon } from '../icon/icon';
   imports: [Icon],
   template: `
     <span class="icon" [class.icon--danger]="tone() === 'danger'">
-      <sga-icon [name]="icon()" [size]="22" />
+      <sga-icon [name]="icon()" [size]="24" />
     </span>
     <h3 class="title">{{ heading() }}</h3>
     @if (description()) {
@@ -27,21 +27,18 @@ import { Icon } from '../icon/icon';
     :host(.compact) {
       padding: var(--space-5) var(--space-4);
     }
+    /* Ícone simples, sem círculo colorido; o vermelho só no estado de erro. */
     .icon {
       display: inline-flex;
-      padding: var(--space-3);
       margin-bottom: var(--space-1);
-      border-radius: 50%;
-      background: var(--green-50);
-      color: var(--green-700);
+      color: var(--text-secondary);
     }
     .icon--danger {
-      background: var(--danger-100);
       color: var(--danger-700);
     }
     .title {
       font-size: 15px;
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
     .description {
       max-width: 440px;

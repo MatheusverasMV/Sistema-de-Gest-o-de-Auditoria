@@ -101,22 +101,28 @@ export class CellDef<T> {
     .scroll {
       overflow-x: auto;
     }
+    /* Cabeçalho claro com rótulos curtos em caixa alta; linhas de ~44 px com fio #DDE1D1;
+       algarismos tabulares para alinhar valores, datas e percentuais. */
     table {
       width: 100%;
       font-size: var(--fs-body);
+      font-variant-numeric: tabular-nums;
     }
     th {
-      padding: 10px var(--space-4);
+      height: 36px;
+      padding: 0 var(--space-4);
       border-bottom: 1px solid var(--border);
       background: var(--surface-muted);
-      font-size: var(--fs-meta);
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      font-size: 11px;
+      font-weight: var(--fw-strong);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: var(--text-secondary);
       white-space: nowrap;
     }
     td {
-      padding: var(--space-3) var(--space-4);
+      height: 44px;
+      padding: var(--space-2) var(--space-4);
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }
@@ -128,10 +134,10 @@ export class CellDef<T> {
       transition: background-color var(--transition-fast);
     }
     tr.interactive:hover {
-      background: var(--green-50);
+      background: var(--surface-muted);
     }
     tr.interactive:focus-visible {
-      outline: 2px solid var(--green-500);
+      outline: 2px solid var(--focus-color);
       outline-offset: -2px;
     }
   `,

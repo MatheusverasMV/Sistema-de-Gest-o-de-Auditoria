@@ -2,7 +2,8 @@
   sgaIconButton
   type="button"
   icon="panel-left"
-  label="Recolher ou expandir menu"
+  [label]="sidebarCollapsed() ? 'Expandir menu' : 'Recolher menu'"
+  [attr.aria-expanded]="!sidebarCollapsed()"
   (click)="toggleSidebar.emit()"
 ></button>
 
@@ -31,11 +32,9 @@
   >
     <sga-icon name="bell" [size]="18" />
     @if (unreadCount()) {
-      <span class="notif-dot" aria-hidden="true">{{ unreadCount() }}</span>
+      <span class="notif-count" aria-hidden="true">{{ unreadCount() }}</span>
     }
   </button>
-
-  <span class="divider" aria-hidden="true"></span>
 
   @if (user(); as current) {
     <button
@@ -44,7 +43,7 @@
       [cdkMenuTriggerFor]="userMenu"
       aria-label="Menu do usuário e troca de persona"
     >
-      <sga-avatar [name]="current.name" [size]="34" />
+      <sga-avatar [name]="current.name" [size]="32" />
       <span class="user-text">
         <span class="user-name">{{ current.name }}</span>
         <span class="user-role">{{ roleLabel(current) }}</span>
@@ -79,9 +78,14 @@
 <ng-template #userMenu>
   <div class="sga-menu persona-menu" cdkMenu>
     @if (user(); as current) {
+      <!-- Hierarquia: identidade, cargo e, só então, as opções. -->
       <div class="menu-user">
-        <span class="user-name">{{ current.name }}</span>
-        <span class="meta">{{ current.email }}</span>
+        <sga-avatar [name]="current.name" [size]="36" />
+        <span class="menu-user-text">
+          <span class="menu-user-name">{{ current.name }}</span>
+          <span class="menu-user-role">{{ roleLabel(current) }}</span>
+          <span class="meta">{{ current.email }}</span>
+        </span>
       </div>
       <div class="sga-menu__divider"></div>
     }

@@ -1,10 +1,14 @@
+// Código do PTA como rótulo neutro ao lado do status (mesma altura do selo).
 .code-chip {
-  padding: 2px var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--green-800);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-strong);
 }
 
 .meta-strip {
@@ -17,15 +21,19 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 
+  // Rótulos curtos em Light caixa alta (D2); valores em Medium 14.
   dt {
     margin-bottom: 4px;
     font-size: var(--fs-meta);
+    font-weight: var(--fw-light);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--text-secondary);
   }
 
   dd {
     margin: 0;
-    font-weight: 500;
+    font-weight: var(--fw-body);
   }
 }
 
@@ -46,7 +54,6 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
 }
 
 .block {
@@ -63,28 +70,25 @@
 
 .block-title {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
   font-size: var(--fs-card-title);
-  font-weight: 600;
+  font-weight: var(--fw-strong);
 }
 
+// Numeração documental discreta: Light 18 em verde-intermediário, sem caixa.
 .num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-sm);
-  background: var(--green-50);
-  color: var(--green-700);
-  font-size: 12px;
+  min-width: 14px;
+  color: var(--text-secondary);
+  font-size: 18px;
+  font-weight: var(--fw-light);
+  font-variant-numeric: tabular-nums;
 }
 
 .title-meta {
   margin-left: auto;
-  font-weight: 400;
+  font-weight: var(--fw-body);
 }
 
 .basis li {
@@ -118,7 +122,7 @@
 }
 
 .done .check {
-  color: var(--green-500);
+  color: var(--text-secondary);
 }
 
 .done .proc-text {
@@ -136,26 +140,27 @@
   gap: 4px;
 }
 
+// Exceções como linhas de lista (sem caixa nem fundo); a severidade fica no selo.
 .exception {
   display: grid;
   grid-template-columns: 50px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3);
-  margin-bottom: var(--space-2);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--danger-100);
-  background: #fffafa;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+
+  &:first-of-type {
+    border-top: 0;
+  }
 
   &.resolved {
-    border-color: var(--border);
-    background: var(--surface-muted);
     color: var(--text-secondary);
   }
 }
 
 .strong {
-  font-weight: 600;
+  font-weight: var(--fw-strong);
 }
 
 .evidences li {
@@ -168,21 +173,17 @@
   transition: background-color 600ms ease;
 
   &.highlight {
-    background: var(--green-50);
-    box-shadow: inset 0 0 0 1px var(--green-200);
+    background: var(--surface-muted);
+    box-shadow: inset 0 0 0 1px var(--border);
   }
 }
 
+// Tipo da evidência pelo ícone, sem bloco: arquivo em verde-intermediário, automação em escuro.
 .ev-icon {
-  display: inline-flex;
-  padding: 7px;
-  border-radius: var(--radius-md);
-  background: var(--surface-sunken);
   color: var(--text-secondary);
 
   &.auto {
-    background: var(--green-100);
-    color: var(--green-700);
+    color: var(--text-primary);
   }
 }
 
@@ -197,7 +198,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-  font-weight: 500;
+  font-weight: var(--fw-body);
 }
 
 .pending {
@@ -280,13 +281,18 @@
   }
 
   &.ok sga-icon {
-    color: var(--green-500);
+    color: var(--text-secondary);
   }
 }
 
 .warn {
   margin-top: var(--space-3);
   color: var(--warning-700);
+}
+
+// "Devolver" é secundário com texto vermelho: desfecho negativo, mas não destrutivo.
+.wf-actions .action-return {
+  color: var(--danger-700);
 }
 
 .wf-actions {
@@ -325,7 +331,7 @@
   gap: var(--space-2);
   margin-top: var(--space-4);
   color: var(--success-700);
-  font-weight: 500;
+  font-weight: var(--fw-body);
 }
 
 .demo-reset {

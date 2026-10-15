@@ -52,9 +52,9 @@ export interface WorkpaperRow {
     </sga-data-table>
   `,
   styles: `
+    /* Código em Medium tabular; o destaque da linha fica só na área. */
     .code {
-      font-weight: 600;
-      color: var(--green-700);
+      color: var(--text-primary);
       white-space: nowrap;
     }
     .stack {
@@ -62,7 +62,7 @@ export interface WorkpaperRow {
       flex-direction: column;
     }
     .strong {
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
   `,
 })

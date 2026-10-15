@@ -60,6 +60,11 @@ export default class AutomationCatalogPage {
     defaultValue: [],
   });
 
+  /** Quantas automações ainda não têm fluxo executável (aviso único no topo do catálogo). */
+  protected readonly unavailableCount = computed(
+    () => this.automations.value().filter((a) => !a.available).length,
+  );
+
   protected readonly countByCategory = computed(() => {
     const counts = new Map<AutomationCategory, number>();
     for (const a of this.automations.value()) {

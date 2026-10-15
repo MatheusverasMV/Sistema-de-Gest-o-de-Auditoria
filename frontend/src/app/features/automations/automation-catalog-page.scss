@@ -19,39 +19,50 @@
   height: 32px;
   padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--surface);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--fs-small);
+  font-weight: var(--fw-body);
   color: var(--text-secondary);
   transition:
     background-color var(--transition-fast),
     border-color var(--transition-fast);
 
   &:hover {
-    border-color: var(--green-500);
+    border-color: var(--text-secondary);
     color: var(--text-primary);
   }
 
   &[aria-pressed='true'] {
-    border-color: var(--green-700);
-    background: var(--green-700);
-    color: #fff;
+    border-color: var(--brand);
+    background: var(--brand);
+    color: var(--text-on-brand);
 
     .chip-count {
-      background: rgb(255 255 255 / 20%);
-      color: #fff;
+      border-color: color-mix(in srgb, var(--text-on-brand) 40%, transparent);
+      color: var(--text-on-brand);
     }
   }
 }
 
+// Contador como rótulo neutro (fio, sem fundo), como nas abas.
 .chip-count {
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background: var(--surface-sunken);
-  color: var(--text-primary);
+  min-width: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
   font-size: 11px;
-  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
+  text-align: center;
+}
+
+.catalog-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: calc(var(--space-3) * -1);
 }
 
 .catalog {
@@ -68,15 +79,6 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-
-  &:hover {
-    border-color: var(--border-strong);
-    box-shadow: var(--shadow-md);
-  }
 }
 
 .tool-head {
@@ -86,21 +88,17 @@
   margin-bottom: var(--space-1);
 }
 
+// Ícone funcional sem bloco de fundo; categoria como rótulo neutro.
 .tool-icon {
-  display: inline-flex;
-  padding: 10px;
-  border-radius: var(--radius-md);
-  background: var(--green-100);
-  color: var(--green-800);
+  color: var(--text-secondary);
 }
 
 .category {
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--surface-sunken);
+  padding: 1px var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: var(--fs-meta);
-  font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 
 .description {
@@ -115,13 +113,16 @@
 
   dt {
     font-size: 11px;
-    color: var(--text-muted);
+    font-weight: var(--fw-light);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }
 
   dd {
     margin: 0;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-body);
   }
 }
 

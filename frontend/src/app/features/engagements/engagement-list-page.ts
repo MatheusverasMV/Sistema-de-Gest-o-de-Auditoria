@@ -98,7 +98,11 @@ import { EngagementService } from './engagement.service';
               <sga-progress-bar [value]="row.progress" [label]="'Progresso de ' + row.client" />
             </ng-template>
             <ng-template sgaCell="risk" [sgaCellOf]="filtered()" let-row>
-              <sga-status-badge [label]="risk[row.risk].label" [tone]="risk[row.risk].tone" />
+              <sga-status-badge
+                [label]="risk[row.risk].label"
+                [tone]="risk[row.risk].tone"
+                kind="risk"
+              />
             </ng-template>
             <ng-template sgaCell="status" [sgaCellOf]="filtered()" let-row>
               <sga-status-badge
@@ -127,7 +131,7 @@ import { EngagementService } from './engagement.service';
       flex-direction: column;
     }
     .client-name {
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
   `,
 })

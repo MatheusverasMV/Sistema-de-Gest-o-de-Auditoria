@@ -8,7 +8,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   font-size: var(--fs-body);
-  font-weight: 500;
+  font-weight: var(--fw-body);
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;
@@ -29,7 +29,7 @@
 
   &:disabled,
   &[aria-disabled='true'] {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
     pointer-events: none;
   }
@@ -38,7 +38,7 @@
 :host(.btn--sm) {
   height: 30px;
   padding: 0 var(--space-3);
-  font-size: 13px;
+  font-size: var(--fs-small);
 }
 
 :host(.btn--primary) {
@@ -57,7 +57,7 @@
 
   &:hover {
     background: var(--surface-muted);
-    border-color: var(--green-500);
+    border-color: var(--text-secondary);
   }
 }
 
@@ -74,6 +74,10 @@
 :host(.btn--danger) {
   background: var(--danger-700);
   color: var(--text-on-brand);
+
+  &:hover {
+    background: color-mix(in srgb, var(--danger-700) 82%, black);
+  }
 }
 
 :host(.btn--icon) {

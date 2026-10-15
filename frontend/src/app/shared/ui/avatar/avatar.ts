@@ -23,7 +23,7 @@ const PALETTE = ['var(--aud-verde-escuro)', 'var(--aud-verde-intermediario)'];
       flex-shrink: 0;
       border-radius: 50%;
       color: var(--text-on-brand);
-      font-weight: 700;
+      font-weight: var(--fw-strong);
       letter-spacing: 0.02em;
       user-select: none;
     }

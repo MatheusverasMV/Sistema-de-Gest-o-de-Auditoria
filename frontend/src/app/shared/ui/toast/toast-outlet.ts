@@ -43,8 +43,8 @@ const TONE_ICON = { success: 'circle-check', info: 'info', danger: 'circle-alert
       gap: var(--space-3);
       padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
       border-radius: var(--radius-md);
-      background: var(--green-950);
-      color: #fff;
+      background: var(--brand);
+      color: var(--text-on-brand);
       box-shadow: var(--shadow-lg);
       animation: rise 160ms ease-out;
     }

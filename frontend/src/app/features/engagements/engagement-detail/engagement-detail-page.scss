@@ -8,7 +8,14 @@
 .meta-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+
+  // Rótulos curtos da faixa de metadados: Light caixa alta (D2); valores em Medium 14.
+  > .meta:first-child {
+    font-weight: var(--fw-light);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 }
 
 .tabs-wrap {

@@ -49,7 +49,7 @@ const STATUS_ORDER: readonly WorkpaperStatus[] = [
     CompactCurrencyPipe,
   ],
   template: `
-    <div class="grid-kpi">
+    <div class="grid-kpi kpi-strip">
       <sga-kpi-card
         label="Progresso geral"
         icon="target"
@@ -156,7 +156,7 @@ const STATUS_ORDER: readonly WorkpaperStatus[] = [
       border-top: 1px solid var(--border);
     }
     .milestones sga-icon {
-      color: var(--green-500);
+      color: var(--text-secondary);
     }
     .grow {
       flex: 1;
@@ -168,7 +168,7 @@ const STATUS_ORDER: readonly WorkpaperStatus[] = [
       border-top: 0;
     }
     .count {
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
   `,
 })
@@ -247,8 +247,8 @@ export class OverviewTab {
       color: var(--text-secondary);
     }
     .done .marker {
-      background: var(--green-100);
-      color: var(--green-700);
+      background: var(--brand-subtle);
+      color: var(--text-primary);
     }
     .done .label {
       color: var(--text-secondary);
@@ -282,7 +282,10 @@ export class PlanningTab {
           ><span class="mono strong">{{ row.id }}</span></ng-template
         >
         <ng-template sgaCell="level" [sgaCellOf]="risks()" let-row
-          ><sga-status-badge [label]="riskMeta[row.level].label" [tone]="riskMeta[row.level].tone"
+          ><sga-status-badge
+            [label]="riskMeta[row.level].label"
+            [tone]="riskMeta[row.level].tone"
+            kind="risk"
         /></ng-template>
         <ng-template sgaCell="response" [sgaCellOf]="risks()" let-row
           ><span class="text-secondary">{{ row.response }}</span></ng-template
@@ -292,7 +295,7 @@ export class PlanningTab {
   `,
   styles: `
     .strong {
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
   `,
 })
@@ -361,8 +364,8 @@ export class RisksTab {
       display: block;
       margin: var(--space-1) 0;
       font-size: 24px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: var(--fw-display);
+      font-variant-numeric: tabular-nums;
     }
   `,
 })
@@ -416,7 +419,7 @@ export class MaterialityTab {
       gap: var(--space-2);
     }
     .evidence sga-icon {
-      color: var(--green-700);
+      color: var(--text-primary);
     }
   `,
 })
@@ -466,7 +469,7 @@ export class EvidencesTab {
   `,
   styles: `
     .strong {
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
   `,
 })

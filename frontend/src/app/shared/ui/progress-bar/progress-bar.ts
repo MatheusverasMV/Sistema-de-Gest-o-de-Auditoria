@@ -24,23 +24,23 @@ import { Component, computed, input } from '@angular/core';
       gap: var(--space-2);
       min-width: 80px;
     }
+    /* Trilho cinza-esverdeado e preenchimento verde-escuro, retos como o restante da interface. */
     .track {
       flex: 1;
       height: 6px;
-      border-radius: var(--radius-pill);
-      background: var(--green-100);
+      background: var(--border);
       overflow: hidden;
     }
     .fill {
       height: 100%;
-      border-radius: inherit;
-      background: var(--green-700);
+      background: var(--brand);
       transition: width 300ms ease;
     }
     .value {
       min-width: 36px;
       text-align: right;
       font-size: var(--fs-meta);
+      font-variant-numeric: tabular-nums;
       color: var(--text-secondary);
     }
   `,

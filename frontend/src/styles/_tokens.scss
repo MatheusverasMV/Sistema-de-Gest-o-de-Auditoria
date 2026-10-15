@@ -46,10 +46,11 @@
   --neutral-700: var(--aud-verde-escuro);
   --neutral-100: var(--aud-cinza-esverdeado);
 
-  // Escala de risco (adaptação da Skill; sempre acompanhada do rótulo textual)
-  --risk-low-bg: var(--aud-cinza-esverdeado);
+  // Escala de risco (adaptação da Skill; sempre acompanhada do rótulo textual). A saliência cresce
+  // com o nível: Baixo quase neutro, Moderado em tinta de lima, Alto e Crítico em fundo pleno.
+  --risk-low-bg: var(--aud-branco-esverdeado);
   --risk-low-fg: var(--aud-verde-escuro);
-  --risk-medium-bg: var(--aud-verde-lima);
+  --risk-medium-bg: var(--aud-tinta-lima);
   --risk-medium-fg: var(--aud-verde-escuro);
   --risk-high-bg: var(--aud-verde-intermediario);
   --risk-high-fg: #ffffff;
@@ -64,10 +65,13 @@
   // Lima: estado ativo sobre fundo escuro e "atenção". Nunca como texto sobre fundo claro.
   --accent: var(--aud-verde-lima);
   --link: var(--aud-verde-intermediario);
-  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--aud-verde-intermediario);
+  // Foco: uma única cor (contornos, bordas de campo) e um único anel (botões, campos).
+  --focus-color: var(--aud-verde-intermediario);
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-color);
 
-  // Aliases de transição: as features ainda usam os primitivos antigos diretamente.
-  // Valores escolhidos pelo papel predominante de cada um; serão removidos na Fase 3.
+  // Aliases de transição: algumas features ainda usam os primitivos antigos diretamente.
+  // Valores escolhidos pelo papel predominante de cada um. Os componentes compartilhados já não
+  // os usam (Fase 3); serão removidos quando as páginas forem migradas (Fases 4 e 5).
   --green-950: var(--aud-verde-escuro);
   --green-800: var(--aud-verde-escuro);
   --green-700: var(--aud-verde-escuro);

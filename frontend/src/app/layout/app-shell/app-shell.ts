@@ -13,7 +13,7 @@ const COLLAPSE_BELOW_PX = 1200;
     <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
     <sga-sidebar [collapsed]="collapsed()" />
     <div class="column">
-      <sga-topbar (toggleSidebar)="collapsed.set(!collapsed())" />
+      <sga-topbar [sidebarCollapsed]="collapsed()" (toggleSidebar)="collapsed.set(!collapsed())" />
       <main id="main-content" tabindex="-1">
         <div class="content">
           <router-outlet />

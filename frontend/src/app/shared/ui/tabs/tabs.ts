@@ -25,7 +25,9 @@ export interface TabItem {
           [tabIndex]="tab.id === selected() ? 0 : -1"
           (click)="selected.set(tab.id)"
         >
-          {{ tab.label }}
+          <!-- data-text reserva a largura do negrito: a aba não "pula" ao ser selecionada. -->
+          <span class="label" [attr.data-text]="tab.label">{{ tab.label }}</span
+          >&ngsp;
           @if (tab.count !== undefined) {
             <span class="count">{{ tab.count }}</span>
           }
@@ -51,7 +53,7 @@ export interface TabItem {
       margin-bottom: -1px;
       background: none;
       color: var(--text-secondary);
-      font-weight: 500;
+      font-weight: var(--fw-body);
       white-space: nowrap;
       transition: color var(--transition-fast);
     }
@@ -59,20 +61,37 @@ export interface TabItem {
       color: var(--text-primary);
     }
     button[aria-selected='true'] {
-      color: var(--green-700);
-      border-bottom-color: var(--green-700);
+      color: var(--text-primary);
+      font-weight: var(--fw-strong);
+      border-bottom-color: var(--text-primary);
     }
     button:focus-visible {
       outline-offset: -2px;
       border-radius: var(--radius-sm);
     }
+    .label {
+      display: inline-flex;
+      flex-direction: column;
+    }
+    .label::after {
+      content: attr(data-text);
+      height: 0;
+      overflow: hidden;
+      visibility: hidden;
+      font-weight: var(--fw-strong);
+    }
+    /* Contador como rótulo neutro: fio cinza-esverdeado, raio 2, sem fundo. */
     .count {
-      padding: 0 6px;
-      border-radius: var(--radius-pill);
-      background: var(--surface-sunken);
+      min-width: 20px;
+      padding: 0 5px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       font-size: 11px;
-      line-height: 18px;
-      color: var(--text-primary);
+      font-weight: var(--fw-body);
+      font-variant-numeric: tabular-nums;
+      line-height: 16px;
+      text-align: center;
+      color: var(--text-secondary);
     }
   `,
 })

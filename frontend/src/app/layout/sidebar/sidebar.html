@@ -22,10 +22,9 @@
 <nav aria-label="Navegação principal">
   @for (section of sections(); track section.title) {
     <div class="section">
+      <!-- Grupos separados por espaçamento; na sidebar recolhida o título some e o espaço fica. -->
       @if (!collapsed()) {
         <h2 class="section-label">{{ section.title }}</h2>
-      } @else {
-        <span class="section-divider" aria-hidden="true"></span>
       }
       <ul>
         @for (item of section.items; track item.link) {
@@ -35,8 +34,8 @@
               [routerLink]="item.link"
               routerLinkActive="active"
               ariaCurrentWhenActive="page"
-              [attr.title]="collapsed() ? item.label : null"
-              [attr.aria-label]="collapsed() ? item.label : null"
+              [attr.title]="collapsed() ? collapsedName(item) : null"
+              [attr.aria-label]="collapsed() ? collapsedName(item) : null"
             >
               <sga-icon [name]="item.icon" [size]="18" />
               @if (!collapsed()) {

@@ -76,12 +76,12 @@ import { SampleSelectionWizard } from './sample-selection/sample-selection-wizar
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 2px var(--space-2);
-      border-radius: var(--radius-pill);
-      background: var(--green-100);
-      color: var(--green-800);
+      padding: 1px var(--space-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
       font-size: var(--fs-meta);
-      font-weight: 500;
+      font-weight: var(--fw-body);
     }
   `,
 })

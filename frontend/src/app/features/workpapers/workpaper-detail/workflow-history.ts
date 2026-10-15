@@ -174,11 +174,11 @@ interface TimelineItem {
     }
     .sub {
       margin-top: var(--space-2);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-light);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
     .cycles {
       display: flex;
@@ -244,25 +244,27 @@ interface TimelineItem {
       gap: var(--space-3);
       padding-bottom: var(--space-4);
     }
+    /* Linha do tempo: trilho de 1 px e marcadores vazados de 24 px, sem fundo por evento. */
     .timeline li:not(:last-child)::after {
       content: '';
       position: absolute;
       top: 28px;
-      bottom: 0;
-      left: 13px;
-      width: 2px;
-      background: var(--green-100);
+      bottom: 4px;
+      left: 12px;
+      width: 1px;
+      background: var(--border);
     }
     .dot {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: var(--green-50);
-      color: var(--green-700);
+      background: var(--surface);
+      box-shadow: inset 0 0 0 1px var(--border-strong);
+      color: var(--text-primary);
     }
     .item {
       display: flex;
@@ -275,10 +277,10 @@ interface TimelineItem {
       color: var(--text-secondary);
     }
     .what {
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
     .detail {
-      font-size: 13px;
+      font-size: var(--fs-small);
     }
     .anomaly {
       display: flex;

@@ -1,9 +1,18 @@
+// Sidebar institucional (Fase 2): fundo verde-escuro, grupos separados por espaçamento, títulos em
+// Light caixa alta e lima reservado ao item ativo. Tons derivados dos tokens e opacos, para que o
+// contraste medido seja o contraste real sobre o #1D2A24.
 :host {
+  --sb-text: color-mix(in srgb, var(--text-on-brand) 78%, var(--aud-verde-escuro)); // 8,6:1
+  --sb-label: color-mix(in srgb, var(--aud-cinza-esverdeado) 65%, var(--aud-verde-escuro)); // 5,6:1
+  --sb-hover: color-mix(in srgb, var(--text-on-brand) 7%, var(--aud-verde-escuro));
+  --sb-active: color-mix(in srgb, var(--accent) 12%, var(--aud-verde-escuro));
+  --sb-rule: color-mix(in srgb, var(--text-on-brand) 8%, var(--aud-verde-escuro));
+
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
-  background: var(--green-950);
-  color: rgb(255 255 255 / 78%);
+  background: var(--aud-verde-escuro);
+  color: var(--sb-text);
   transition: width 160ms ease;
 }
 
@@ -11,21 +20,23 @@
   width: var(--sidebar-width-collapsed);
 }
 
+// Área da marca: mesma altura da topbar, com o fio inferior alinhado ao dela.
 .brand {
   display: flex;
   align-items: center;
   height: var(--topbar-height);
-  // Área de não interferência do logotipo horizontal (≥ 0,79 × altura nas laterais).
+  // Área de não interferência do logotipo horizontal (≥ 0,79 × altura nas laterais, ≥ 0,61 ×
+  // altura acima e abaixo). Os 24 px também alinham o logotipo aos ícones da navegação.
   padding: 0 var(--space-6);
   flex-shrink: 0;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  border-bottom: 1px solid var(--sb-rule);
 
   &:hover {
     text-decoration: none;
   }
 
   &:focus-visible {
-    outline: 2px solid var(--text-on-brand);
+    outline: 2px solid var(--accent);
     outline-offset: -2px;
   }
 }
@@ -50,29 +61,35 @@
 nav {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-3) var(--space-3) var(--space-4);
+  padding: var(--space-3);
   scrollbar-width: thin;
-  scrollbar-color: rgb(255 255 255 / 20%) transparent;
+  scrollbar-color: var(--sb-rule) transparent;
 }
 
+:host(.collapsed) nav {
+  padding: var(--space-3) var(--space-4);
+}
+
+// 12 px entre grupos: a navegação completa cabe sem rolagem a partir de 768 px de altura.
 .section + .section {
   margin-top: var(--space-3);
 }
 
+// Títulos de grupo: Light caixa alta (decisão D2), mais discretos que os itens clicáveis.
 .section-label {
-  padding: var(--space-2) var(--space-3) var(--space-1);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  padding: 0 var(--space-3) 6px;
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-light);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgb(255 255 255 / 55%);
+  color: var(--sb-label);
 }
 
-.section-divider {
-  display: block;
-  height: 1px;
-  margin: var(--space-2) var(--space-2) var(--space-2);
-  background: rgb(255 255 255 / 10%);
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .nav-link {
@@ -82,15 +99,19 @@ nav {
   height: 36px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-md);
-  color: rgb(255 255 255 / 78%);
-  font-weight: 500;
+  color: var(--sb-text);
+  font-weight: var(--fw-body);
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast);
 
+  sga-icon {
+    flex-shrink: 0;
+  }
+
   &:hover {
-    background: rgb(255 255 255 / 7%);
-    color: #fff;
+    background: var(--sb-hover);
+    color: var(--text-on-brand);
     text-decoration: none;
   }
 
@@ -99,10 +120,10 @@ nav {
     outline-offset: -2px;
   }
 
-  // Estado ativo: lima sobre o verde-escuro (8,2:1), como acento da marca.
+  // Item ativo: barra lima de 3 px, fundo lima discreto e texto pleno. O hover não o altera.
   &.active {
-    background: rgb(167 207 0 / 12%);
-    color: #fff;
+    background: var(--sb-active);
+    color: var(--text-on-brand);
     box-shadow: inset 3px 0 0 var(--accent);
   }
 }
@@ -114,12 +135,16 @@ nav {
 
 .nav-label {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .restricted {
+  flex-shrink: 0;
+  // Cadeado mais perto do rótulo, para "Qualidade & Processos" caber sem reticências.
+  margin-left: calc(-1 * var(--space-1));
   color: var(--accent);
 }
 
@@ -127,10 +152,10 @@ nav {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  border-top: 1px solid rgb(255 255 255 / 8%);
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--sb-rule);
   font-size: 11px;
-  color: rgb(255 255 255 / 55%);
+  color: var(--sb-label);
 }
 
 .env-dot {

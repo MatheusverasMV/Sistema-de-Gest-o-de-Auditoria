@@ -22,21 +22,24 @@ import { Breadcrumb, BreadcrumbItem } from '../breadcrumb/breadcrumb';
       <div class="actions"><ng-content select="[header-actions]" /></div>
     </div>
   `,
+  // Título dominante (ExtraBold 28, verde-escuro), subtítulo discreto e ações alinhadas à base do
+  // título. Sem fundo nem fio: a hierarquia vem só da tipografia e do espaçamento.
   styles: `
     :host {
       display: flex;
       flex-direction: column;
-      gap: var(--space-3);
+      gap: var(--space-2);
     }
     .row {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
       justify-content: space-between;
-      gap: var(--space-4);
+      gap: var(--space-3) var(--space-4);
     }
     .titles {
       display: flex;
+      flex: 1 1 320px;
       flex-direction: column;
       gap: var(--space-1);
       min-width: 0;
@@ -45,9 +48,14 @@ import { Breadcrumb, BreadcrumbItem } from '../breadcrumb/breadcrumb';
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: var(--space-3);
+      gap: var(--space-2) var(--space-3);
+    }
+    .page-title {
+      color: var(--text-primary);
+      overflow-wrap: anywhere;
     }
     .subtitle {
+      max-width: 72ch;
       color: var(--text-secondary);
     }
     .actions {

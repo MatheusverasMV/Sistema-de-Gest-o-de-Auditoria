@@ -84,7 +84,7 @@ import {
     .method {
       padding: 2px var(--space-2);
       border: 1px solid var(--border);
-      border-radius: var(--radius-pill);
+      border-radius: var(--radius-sm);
       font-size: 11px;
       font-weight: 500;
       color: var(--text-secondary);
@@ -102,7 +102,7 @@ import {
       align-items: center;
       gap: 6px;
       padding: 2px var(--space-2);
-      border-radius: var(--radius-pill);
+      border-radius: var(--radius-sm);
       font-size: var(--fs-meta);
       font-weight: 600;
     }

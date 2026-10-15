@@ -72,7 +72,7 @@ import { SEVERITY_META } from '../quality-ui';
       gap: 6px;
       width: fit-content;
       padding: 2px var(--space-2);
-      border-radius: var(--radius-pill);
+      border-radius: var(--radius-sm);
       font-size: var(--fs-meta);
       font-weight: 600;
     }

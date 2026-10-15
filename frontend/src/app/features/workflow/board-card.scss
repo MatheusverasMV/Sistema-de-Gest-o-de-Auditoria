@@ -12,20 +12,19 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
   text-align: left;
   cursor: grab;
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);
 
+  // Cartão clicável e arrastável: destaque discreto só na borda.
   &:hover {
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-md);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--green-500);
+    outline: 2px solid var(--focus-color);
     outline-offset: 1px;
   }
 
@@ -41,80 +40,50 @@
   padding-right: 22px;
 }
 
+// Tipo do cartão em texto neutro com ícone (sem bloco colorido).
 .type {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 600;
-  background: var(--surface-sunken);
-  color: var(--text-primary);
-}
-
-.type--workpaper {
-  background: var(--green-100);
-  color: var(--green-800);
-}
-
-.type--review {
-  background: var(--warning-100);
-  color: var(--warning-700);
-}
-
-.type--issue {
-  background: var(--danger-100);
-  color: var(--danger-700);
-}
-
-.type--procedure {
-  background: var(--info-100);
-  color: var(--info-700);
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
 }
 
 .code {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green-700);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-strong);
+  color: var(--text-primary);
 }
 
 .title {
-  font-weight: 600;
+  font-weight: var(--fw-strong);
   line-height: 1.35;
+  color: var(--text-primary);
 }
 
 .tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.tag {
-  padding: 0 6px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  line-height: 18px;
+  font-size: var(--fs-meta);
   color: var(--text-secondary);
 }
 
 .bottom {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  padding-top: var(--space-1);
 }
 
 .due {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 
   &.overdue {
     color: var(--danger-700);
-    font-weight: 600;
+    font-weight: var(--fw-strong);
   }
 }
 
@@ -122,26 +91,30 @@
   margin-left: auto;
 }
 
-.status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px dashed var(--border);
-}
-
 .formal {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--border);
+  font-size: var(--fs-meta);
   color: var(--text-secondary);
 }
 
+// Único destaque cromático do cartão: posição operacional diferente do status formal.
 .formal--differs {
+  align-self: flex-start;
+  padding: 2px 6px;
+  border-top: 0;
+  border-radius: var(--radius-sm);
+  background: var(--warning-100);
   color: var(--warning-700);
-  font-weight: 700;
+  font-weight: var(--fw-strong);
+}
+
+.formal-note {
+  font-weight: var(--fw-body);
 }
 
 .open-link {
@@ -154,7 +127,7 @@
   color: var(--text-muted);
 
   &:hover {
-    background: var(--green-100);
-    color: var(--green-800);
+    background: var(--brand-subtle);
+    color: var(--text-primary);
   }
 }

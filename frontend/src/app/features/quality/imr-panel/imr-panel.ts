@@ -76,7 +76,7 @@ export interface ChartPointSelection {
     .mr-badge {
       margin-left: var(--space-1);
       padding: 0 6px;
-      border-radius: var(--radius-pill);
+      border-radius: var(--radius-sm);
       background: var(--warning-100);
       color: var(--warning-700);
       font-size: 11px;

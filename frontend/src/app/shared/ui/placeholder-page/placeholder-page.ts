@@ -41,8 +41,8 @@ import { EmptyState } from '../states/states';
     }
     .planned-title {
       margin-bottom: var(--space-2);
-      font-size: 13px;
-      font-weight: 600;
+      font-size: var(--fs-small);
+      font-weight: var(--fw-strong);
       color: var(--text-secondary);
     }
     ul {
@@ -55,7 +55,7 @@ import { EmptyState } from '../states/states';
       gap: var(--space-2);
     }
     sga-icon {
-      color: var(--green-500);
+      color: var(--text-secondary);
     }
   `,
 })

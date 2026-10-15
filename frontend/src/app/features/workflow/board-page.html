@@ -141,7 +141,7 @@
   @if (detailCard(); as card) {
     <dl class="details">
       <div>
-        <dt>Status</dt>
+        <dt>Coluna do quadro</dt>
         <dd>
           @if (detailColumn(); as col) {
             <sga-status-badge [label]="columnMeta[col].label" [tone]="columnMeta[col].tone" />
@@ -158,6 +158,7 @@
           <sga-status-badge
             [label]="priority[card.priority].label"
             [tone]="priority[card.priority].tone"
+            kind="priority"
           />
         </dd>
       </div>
@@ -238,17 +239,16 @@
       }
     }
   }
-  @if (detailCard()?.workpaperId; as wpId) {
-    @if (isWorkpaperLinked(wpId)) {
-      <a
-        drawer-footer
-        sgaButton
-        variant="primary"
-        icon="external-link"
-        [routerLink]="['/workpapers', wpId]"
-        >Abrir PTA</a
-      >
-    }
+  <!-- Uma única condição: @if aninhado impede a projeção no rodapé do drawer. -->
+  @if (linkedWorkpaperId(); as wpId) {
+    <a
+      drawer-footer
+      sgaButton
+      variant="primary"
+      icon="external-link"
+      [routerLink]="['/workpapers', wpId]"
+      >Abrir PTA</a
+    >
   }
   @if (selectedSummary()?.engagement; as eng) {
     <a

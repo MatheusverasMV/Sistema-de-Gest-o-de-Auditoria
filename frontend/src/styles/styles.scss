@@ -22,12 +22,12 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: var(--green-500);
+    border-color: var(--text-secondary);
   }
 
   &:focus {
     outline: none;
-    border-color: var(--green-500);
+    border-color: var(--focus-color);
     box-shadow: var(--focus-ring);
   }
 
@@ -80,6 +80,21 @@ textarea.sga-input {
   }
 }
 
+// Indicadores relacionados numa faixa única: células separadas por fios de 1 px (o fundo do grid
+// aparece no vão), em vez de blocos soltos. Usar junto com .grid-kpi.
+.kpi-strip {
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--border);
+
+  > sga-kpi-card {
+    border: 0;
+    border-radius: 0;
+  }
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -97,11 +112,12 @@ textarea.sga-input {
   box-shadow: var(--shadow-lg);
 }
 
+// Rótulo de seção do menu: Light caixa alta, como os grupos da sidebar (decisão D2).
 .sga-menu__label {
   padding: var(--space-2) var(--space-3) var(--space-1);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-light);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }

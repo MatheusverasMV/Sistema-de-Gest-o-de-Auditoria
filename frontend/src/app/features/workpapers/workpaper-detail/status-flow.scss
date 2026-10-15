@@ -30,12 +30,12 @@ li {
   background: var(--surface);
   color: var(--text-muted);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--fw-strong);
   z-index: 1;
 }
 
 .label {
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -52,26 +52,29 @@ li {
 
 .done {
   .marker {
-    border-color: var(--green-700);
-    background: var(--green-700);
-    color: #fff;
+    border-color: var(--brand);
+    background: var(--brand);
+    color: var(--text-on-brand);
   }
 
   .connector {
-    background: var(--green-500);
+    background: var(--text-secondary);
   }
 }
 
 .current {
   .marker {
-    border-color: var(--green-700);
-    color: var(--green-700);
-    box-shadow: 0 0 0 4px var(--green-100);
+    // Etapa atual: anel lima de 2 px (acento da marca), afastado do marcador por 2 px de branco.
+    border-color: var(--brand);
+    color: var(--text-primary);
+    box-shadow:
+      0 0 0 2px var(--surface),
+      0 0 0 4px var(--accent);
   }
 
   .label {
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: var(--fw-strong);
   }
 }
 
@@ -83,7 +86,7 @@ li {
   padding: var(--space-2) var(--space-3);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: var(--fs-small);
   color: var(--text-secondary);
 
   &.active {
@@ -101,7 +104,7 @@ li {
 
 .branch-note {
   margin-left: auto;
-  font-weight: 600;
+  font-weight: var(--fw-strong);
 }
 
 @media (max-width: 1000px) {

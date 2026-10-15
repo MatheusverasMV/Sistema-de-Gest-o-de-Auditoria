@@ -2,7 +2,11 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { Component, input, model } from '@angular/core';
 import { IconButton } from '../button/button';
 
-/** Painel lateral modal. Fecha com Esc, clique no fundo ou botão de fechar; mantém o foco preso enquanto aberto. */
+/**
+ * Painel lateral modal. Fecha com Esc, clique no fundo ou botão de fechar; mantém o foco preso
+ * enquanto aberto. Única elevação (shadow-lg) sobre fundo escurecido; fios só para separar o
+ * cabeçalho e o rodapé do conteúdo rolável.
+ */
 @Component({
   selector: 'sga-drawer',
   imports: [A11yModule, IconButton],
@@ -44,7 +48,7 @@ import { IconButton } from '../button/button';
       position: fixed;
       inset: 0;
       z-index: 900;
-      background: rgb(29 42 36 / 28%);
+      background: rgb(29 42 36 / 32%);
       animation: fade 150ms ease;
     }
     .panel {

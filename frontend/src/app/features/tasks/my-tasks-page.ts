@@ -9,7 +9,6 @@ import {
   CellDef,
   DataTable,
   EmptyState,
-  Icon,
   PageHeader,
   StatusBadge,
   TableColumn,
@@ -18,7 +17,7 @@ import { TaskRow, TaskService } from './task.service';
 
 @Component({
   selector: 'sga-my-tasks-page',
-  imports: [PageHeader, Card, DataTable, CellDef, StatusBadge, Icon, EmptyState, CalendarDatePipe],
+  imports: [PageHeader, Card, DataTable, CellDef, StatusBadge, EmptyState, CalendarDatePipe],
   template: `
     <div class="page">
       <sga-page-header heading="Minhas Tarefas" [subheading]="subheading()" />
@@ -41,10 +40,8 @@ import { TaskRow, TaskService } from './task.service';
             (rowActivate)="open($event)"
           >
             <ng-template sgaCell="title" [sgaCellOf]="tasks.value()" let-row>
-              <div class="title" [class.done]="row.done">
-                <sga-icon [name]="row.done ? 'circle-check' : 'list-todo'" [size]="16" />
-                <span>{{ row.title }}</span>
-              </div>
+              <!-- A situação fica na coluna própria; o título só perde peso quando concluído. -->
+              <span class="title" [class.done]="row.done">{{ row.title }}</span>
             </ng-template>
             <ng-template sgaCell="workpaper" [sgaCellOf]="tasks.value()" let-row>
               <span class="mono">{{ row.workpaperId ?? '—' }}</span>
@@ -53,6 +50,7 @@ import { TaskRow, TaskService } from './task.service';
               <sga-status-badge
                 [label]="priority[row.priority].label"
                 [tone]="priority[row.priority].tone"
+                kind="priority"
               />
             </ng-template>
             <ng-template sgaCell="dueDate" [sgaCellOf]="tasks.value()" let-row>
@@ -74,21 +72,16 @@ import { TaskRow, TaskService } from './task.service';
   `,
   styles: `
     .title {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      font-weight: 500;
-    }
-    .title sga-icon {
-      color: var(--green-700);
+      font-weight: var(--fw-body);
+      color: var(--text-primary);
     }
     .title.done {
       color: var(--text-secondary);
-      font-weight: 300;
+      font-weight: var(--fw-light);
     }
     .overdue {
       color: var(--danger-700);
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
   `,
 })

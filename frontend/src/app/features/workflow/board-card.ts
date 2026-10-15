@@ -32,7 +32,7 @@ const TYPE_ICON: Record<BoardCard['type'], string> = {
       [attr.aria-label]="ariaLabel()"
     >
       <span class="top">
-        <span class="type" [class]="'type type--' + card().type">
+        <span class="type">
           <sga-icon [name]="typeIcon[card().type]" [size]="12" />{{ typeLabel[card().type] }}
         </span>
         @if (card().code) {
@@ -40,32 +40,31 @@ const TYPE_ICON: Record<BoardCard['type'], string> = {
         }
       </span>
       <span class="title">{{ card().title }}</span>
+      <!-- Categorias como texto neutro; a coluna já informa o status (aria-label mantém). -->
       @if (card().tags.length) {
-        <span class="tags">
-          @for (tag of card().tags; track tag) {
-            <span class="tag">{{ tag }}</span>
-          }
-        </span>
+        <span class="tags">{{ card().tags.join(' · ') }}</span>
       }
       <span class="bottom">
         <sga-status-badge
           [label]="priority[card().priority].label"
           [tone]="priority[card().priority].tone"
+          kind="priority"
         />
         <span class="due" [class.overdue]="overdue()">
           <sga-icon name="calendar-clock" [size]="13" />{{ card().dueDate | calendarDate }}
         </span>
         <sga-avatar class="assignee" [name]="assigneeName()" [size]="24" />
       </span>
-      <span class="status">
-        <sga-status-badge [label]="statusMeta().label" [tone]="statusMeta().tone" />
-        @if (formalStatus(); as formal) {
-          <span class="formal" [class.formal--differs]="positionDiffers()">
-            <sga-icon [name]="positionDiffers() ? 'circle-alert' : 'file-text'" [size]="12" />
-            PTA: {{ workpaperStatus[formal].label }}
-          </span>
-        }
-      </span>
+      @if (formalStatus(); as formal) {
+        <!-- Status formal do PTA: sempre visível; destaque lima só quando diverge da coluna. -->
+        <span class="formal" [class.formal--differs]="positionDiffers()">
+          <sga-icon [name]="positionDiffers() ? 'circle-alert' : 'file-text'" [size]="12" />
+          PTA: {{ workpaperStatus[formal].label }}
+          @if (positionDiffers()) {
+            <span class="formal-note">· difere da coluna</span>
+          }
+        </span>
+      }
     </button>
     @if (card().workpaperId && workpaperLinked()) {
       <a
