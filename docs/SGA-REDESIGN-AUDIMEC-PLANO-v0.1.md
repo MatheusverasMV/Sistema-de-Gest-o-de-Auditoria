@@ -738,6 +738,44 @@ Nada do que sustenta a leitura estatística é removido: série, LC, LSC/LIC, fa
   - as legendas mostram os novos estilos;
   - os testes de Qualidade (`control-limits`, `control-signals`, `quality-analysis`, `quality-links`) continuam passando;
   - overflow zero em 390 px em Qualidade.
+- **Execução (15/10/2026).** Qualidade & Processos e Análise de Dados. Só apresentação: o motor de CEP (`control-limits`, `control-signals`, `quality-analysis`, `quality-metrics`), os serviços, os dados e as baselines não foram alterados. As 4 suítes estatísticas passam sem mudança.
+  - **Convenção das cartas** (todas: I, MR, p e u).
+
+    | Elemento | Apresentação |
+    |---|---|
+    | Série e pontos | verde-escuro, 2 px; ponto de 3,5 px |
+    | LC | verde-intermediário, contínua, 1,5 px, rótulo em Bold |
+    | LSC/LIC | verde-intermediário, tracejadas 6/4, 1,5 px, rótulos regulares (antes: vermelho a 75%) |
+    | Fora de controle | losango vermelho (o único vermelho da carta) e rótulo de valor vermelho |
+    | Atenção | círculo lima com contorno escuro; rótulo de valor escuro |
+    | Informativo | círculo vazado em verde-intermediário (antes: cheio, indistinguível do ponto comum) |
+    | Grade, faixa de referência | `#DDE1D1`, `#F1F2EC` (sem mudança) |
+    | Rótulos de eixo e de fase | verde-intermediário, 11 px; a fase era 10 px |
+
+    - LC e limites se distinguem pelo traço, pela espessura e pelos rótulos, não pela cor.
+    - A legenda reproduz o tracejado 6/4 exato.
+    - O tooltip tem sombra média, valores tabulares e o mesmo conteúdo de antes.
+  - **Coerência legenda × gráfico (corrigido; já existia).** A legenda usava uma regra diferente do marcador: um ponto da MR além do LSC com sinal de atenção aparecia lima, mas a legenda dizia "Fora de controle" e omitia "Padrão sob atenção". Agora ela deriva do mesmo `marker()`. A classificação dos pontos não mudou.
+  - **I-MR.** Cada carta tem um rótulo ("Carta I · valores individuais", "Carta MR · amplitude móvel"). O texto técnico da MR foi mantido.
+  - **Cartão de indicador.**
+    - Situação na linguagem do selo: fundo só em atenção e crítico.
+    - "Último" em ExtraBold tabular.
+  - **Lista e contagem de sinais.** Crítico em ícone e texto vermelhos, sem selo preenchido por linha. Atenção com tinta de lima. Informativo em verde-intermediário.
+  - **Página de Qualidade.**
+    - Indicadores de apoio na faixa `.kpi-strip`.
+    - Dimensões ("Velocidade", "Qualidade"…) como rótulo Light caixa alta, ao lado da pergunta gerencial.
+  - **Drill-down.**
+    - Sinal sem caixa colorida: fio lateral no tom da severidade, mais rótulo.
+    - Rótulos de seção em Light caixa alta; valor observado em ExtraBold.
+    - Linha de destaque da decomposição em `#F1F2EC`.
+  - **Análise de Dados.**
+    - KPIs na faixa; uma coluna abaixo de 640 px.
+    - Barras mensais em verde-intermediário. Pico (já citado na leitura e na nota) em lima com contorno escuro; mês sob o cursor ou foco em verde-escuro.
+    - Barras de exceção retas, em verde-escuro sobre `#DDE1D1`.
+  - **Tokens.** Os 11 usos restantes de `--green-*` foram migrados e os aliases saíram de `_tokens.scss`. Não há mais `--green-*`, `font-weight: 600` nem hexadecimais fora de comentários no `src/app`. `radius-pill` só no contador de notificações.
+  - **Responsivo (390 px).** Análise de 20 para 0 px de overflow. Qualidade continua com 43 px (Fase 6): o critério "overflow zero em Qualidade" segue pendente.
+  - **Testes.** 163, todos aprovados (eram 159). `control-chart.spec.ts` cobre marcador por classificação, valores dos limites, tabela acessível e legenda coerente com os marcadores.
+  - **Adiado.** O tooltip pode cobrir os rótulos LSC/LC/LIC à direita quando o ponto está no fim da série: o posicionamento é comportamento existente, e reposicioná-lo é tarefa da Fase 6.
 
 ### Fase 6 — Refinamento · **P2**
 

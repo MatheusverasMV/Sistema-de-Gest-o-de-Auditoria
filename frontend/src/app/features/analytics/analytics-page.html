@@ -18,7 +18,7 @@
         tone="danger"
     /></sga-card>
   } @else if (analysis(); as a) {
-    <section class="grid-3" aria-label="Indicadores da base">
+    <section class="grid-3 kpi-strip" aria-label="Indicadores da base">
       <sga-kpi-card
         label="Lançamentos analisados"
         icon="database"
@@ -63,11 +63,12 @@
               (focus)="hoveredMonth.set(i)"
               (blur)="hoveredMonth.set(null)"
             >
+              <!-- Pico (maior mês, já citado na leitura e na nota) é o único destaque lima;
+                   o mês sob o cursor ou foco fica em verde-escuro. -->
               <div
                 class="bar"
-                [class.active]="
-                  hoveredMonth() === i || (hoveredMonth() === null && i === peakIndex())
-                "
+                [class.peak]="i === peakIndex()"
+                [class.active]="hoveredMonth() === i"
                 [style.height.%]="(m.amount / maxMonthly()) * 100"
               ></div>
               <span class="bar-label">{{ m.month }}</span>

@@ -119,7 +119,7 @@
       }
       @if (valueLabels().has(p.id)) {
         <text
-          class="signal-label"
+          [class]="'signal-label signal-label--' + m"
           [attr.x]="p.x"
           [attr.y]="p.value < p.lcl ? p.y + 20 : p.y - 12"
           text-anchor="middle"

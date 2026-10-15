@@ -1,7 +1,11 @@
+// Faixa de indicadores (gap e fios vêm do utilitário global .kpi-strip).
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .cols {
@@ -40,20 +44,27 @@
   cursor: default;
 
   &:focus-visible .bar {
-    outline: 2px solid var(--green-500);
+    outline: 2px solid var(--focus-color);
     outline-offset: 2px;
   }
 }
 
+// Barras mensais em verde-intermediário; pico em lima com contorno escuro (o lima sozinho não
+// tem contraste sobre branco); mês sob o cursor ou foco em verde-escuro.
 .bar {
   width: 100%;
   max-width: 24px;
-  border-radius: 4px 4px 0 0;
-  background: var(--border-strong);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--text-secondary);
   transition: background-color var(--transition-fast);
 
+  &.peak {
+    background: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--brand);
+  }
+
   &.active {
-    background: var(--green-700);
+    background: var(--brand);
   }
 }
 
@@ -61,7 +72,7 @@
   position: absolute;
   bottom: -22px;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .note {
@@ -81,19 +92,24 @@
   }
 }
 
+// Barras de exceção retas, em verde-escuro sobre trilho cinza-esverdeado.
 .rule-bar {
   height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--warning-100);
+  background: var(--border);
   overflow: hidden;
 
   span {
     display: block;
     height: 100%;
-    background: var(--warning-700);
+    background: var(--brand);
   }
 }
 
 .rules strong {
   text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout {
+  font-variant-numeric: tabular-nums;
 }

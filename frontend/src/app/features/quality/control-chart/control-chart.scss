@@ -8,14 +8,19 @@
   border-radius: var(--radius-md);
 
   &:focus-visible {
-    outline: 2px solid var(--green-500);
+    outline: 2px solid var(--focus-color);
     outline-offset: 4px;
   }
 }
 
+// Convenção das cartas (Fase 5): série e pontos em verde-escuro; LC contínua e LSC/LIC tracejadas
+// (6/4), ambas em verde-intermediário, distinguidas pelo traço, pela espessura e pelos rótulos;
+// vermelho só no losango fora de controle; atenção em lima com contorno escuro; informativo vazado.
+// Só a aparência muda: coordenadas, limites e classificação vêm intactos do componente.
 svg {
   overflow: visible;
   font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
 }
 
 .grid {
@@ -39,10 +44,10 @@ svg {
 }
 
 .phase-label {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  fill: var(--text-muted);
+  font-size: 11px;
+  font-weight: var(--fw-light);
+  letter-spacing: 0.04em;
+  fill: var(--text-secondary);
 }
 
 .axis {
@@ -52,10 +57,9 @@ svg {
 
 .limit {
   fill: none;
-  stroke: var(--danger-500);
+  stroke: var(--text-secondary);
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
-  opacity: 0.75;
 }
 
 .center {
@@ -68,7 +72,7 @@ svg {
   fill: var(--text-secondary);
 
   &.strong {
-    font-weight: 600;
+    font-weight: var(--fw-strong);
     fill: var(--text-primary);
   }
 }
@@ -80,14 +84,14 @@ svg {
 
 .series {
   fill: none;
-  stroke: var(--green-700);
+  stroke: var(--brand);
   stroke-width: 2;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
 .point {
-  fill: var(--green-700);
+  fill: var(--brand);
   stroke: var(--surface);
   stroke-width: 2;
   pointer-events: none;
@@ -104,20 +108,28 @@ svg {
   stroke-width: 1.5;
 }
 
+// Informativo: círculo vazado (a forma o distingue do ponto comum, não só a cor).
 .point--info {
-  fill: var(--info-500);
+  fill: var(--surface);
+  stroke: var(--info-500);
+  stroke-width: 2;
 }
 
 .selected-ring {
   fill: none;
-  stroke: var(--green-950);
+  stroke: var(--brand);
   stroke-width: 2;
   pointer-events: none;
 }
 
+// Rótulo de valor na cor do marcador: vermelho só para o losango fora de controle.
 .signal-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: var(--fw-strong);
+  fill: var(--text-primary);
+}
+
+.signal-label--critical {
   fill: var(--danger-700);
 }
 
@@ -133,8 +145,8 @@ svg {
   border-radius: var(--radius-md);
   background: var(--surface);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  font-size: 13px;
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-small);
   pointer-events: none;
   z-index: 2;
 }
@@ -146,7 +158,7 @@ svg {
 }
 
 .tt-value {
-  font-weight: 600;
+  font-weight: var(--fw-strong);
   font-variant-numeric: tabular-nums;
 }
 
@@ -159,12 +171,12 @@ svg {
 
   &.signal {
     color: var(--danger-700);
-    font-weight: 600;
+    font-weight: var(--fw-strong);
   }
 
   &.warn {
     color: var(--warning-700);
-    font-weight: 600;
+    font-weight: var(--fw-strong);
   }
 }
 
@@ -202,6 +214,7 @@ svg {
 .tt-limits {
   margin-top: 4px;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
 
@@ -228,11 +241,12 @@ svg {
   }
 }
 
+// Chaves da legenda com o mesmo traço do gráfico (o tracejado 6/4 é reproduzido exatamente).
 .key {
   display: inline-block;
-  width: 18px;
+  width: 20px;
   height: 0;
-  border-top: 2px solid var(--green-700);
+  border-top: 2px solid var(--brand);
 }
 
 .key--center {
@@ -240,7 +254,9 @@ svg {
 }
 
 .key--limit {
-  border-top: 1.5px dashed var(--danger-500);
+  height: 1.5px;
+  border: 0;
+  background: repeating-linear-gradient(90deg, var(--text-secondary) 0 6px, transparent 6px 10px);
 }
 
 .key--signal {
@@ -262,9 +278,9 @@ svg {
 .key--info {
   width: 10px;
   height: 10px;
-  border: 0;
+  border: 2px solid var(--info-500);
   border-radius: 50%;
-  background: var(--info-500);
+  background: var(--surface);
 }
 
 .key--reference {

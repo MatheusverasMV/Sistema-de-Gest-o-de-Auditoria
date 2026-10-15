@@ -196,11 +196,12 @@ export class ControlChart {
   });
 
   protected readonly legend = computed(() => {
-    const points = this.data().points;
+    // A legenda deriva do mesmo marker() que desenha os pontos: só lista o que aparece.
+    const markers = new Set(this.data().points.map((p) => this.marker(p)));
     return {
-      signal: points.some((p) => p.outOfControl || p.flag === 'critical'),
-      attention: points.some((p) => p.flag === 'attention' && !p.outOfControl),
-      info: points.some((p) => p.flag === 'info' && !p.outOfControl),
+      signal: markers.has('critical'),
+      attention: markers.has('attention'),
+      info: markers.has('info'),
       reference: this.phaseBoundary() !== null,
     };
   });

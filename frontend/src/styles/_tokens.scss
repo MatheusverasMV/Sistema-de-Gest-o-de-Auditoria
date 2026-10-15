@@ -69,17 +69,6 @@
   --focus-color: var(--aud-verde-intermediario);
   --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--focus-color);
 
-  // Aliases de transição: algumas features ainda usam os primitivos antigos diretamente.
-  // Valores escolhidos pelo papel predominante de cada um. Os componentes compartilhados já não
-  // os usam (Fase 3); serão removidos quando as páginas forem migradas (Fases 4 e 5).
-  --green-950: var(--aud-verde-escuro);
-  --green-800: var(--aud-verde-escuro);
-  --green-700: var(--aud-verde-escuro);
-  --green-500: var(--aud-verde-intermediario);
-  --green-200: var(--aud-cinza-esverdeado);
-  --green-100: var(--aud-tinta-intermediario);
-  --green-50: var(--aud-branco-esverdeado);
-
   // Tipografia — Exo 2 (manual p. 09); pilha de fallback = adaptação da Skill
   --font-sans: 'Exo 2', 'Segoe UI', Arial, sans-serif;
   --fw-light: 300; // H2 / rótulos de seção (oficial)

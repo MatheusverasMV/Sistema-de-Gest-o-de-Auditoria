@@ -4,10 +4,10 @@
   gap: 4px;
   padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--green-950);
+  background: var(--brand);
   color: var(--text-on-brand);
   font-size: var(--fs-meta);
-  font-weight: 500;
+  font-weight: var(--fw-body);
 }
 
 .filters__row {
@@ -35,30 +35,36 @@
   gap: var(--space-2);
 }
 
+// Contagem por severidade na mesma linguagem da lista de sinais (fundo só na atenção).
 .count {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px var(--space-2);
+  height: 22px;
   border-radius: var(--radius-sm);
   font-size: var(--fs-meta);
-  font-weight: 600;
+  font-weight: var(--fw-strong);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .count--danger {
-  background: var(--danger-100);
   color: var(--danger-700);
 }
 
 .count--warning {
+  padding: 0 var(--space-2);
   background: var(--warning-100);
   color: var(--warning-700);
 }
 
 .count--info {
-  background: var(--info-100);
   color: var(--info-700);
+}
+
+.signal-summary {
+  align-items: center;
+  column-gap: var(--space-3);
 }
 
 // Dimensões com um único indicador dividem a linha; as com dois ocupam a largura toda.
@@ -79,11 +85,21 @@
   grid-column: 1 / -1;
 }
 
+// Nome da dimensão como rótulo curto (Light caixa alta, D2) com a pergunta gerencial ao lado:
+// o título de cada carta (Bold 16) é que domina.
 .dimension__header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1) var(--space-3);
+
+  .section-title {
+    font-size: var(--fs-small);
+    font-weight: var(--fw-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
 }
 
 .dimension__grid {

@@ -66,26 +66,28 @@ import { SEVERITY_META } from '../quality-ui';
     button:focus-visible {
       outline-offset: -2px;
     }
+    /* Severidade em ícone + texto, sem selo preenchido por linha. Crítico em vermelho (alarme);
+       atenção com tinta de lima, porque o lima não é legível como texto; informativo em
+       verde-intermediário. */
     .severity {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       width: fit-content;
-      padding: 2px var(--space-2);
+      height: 22px;
       border-radius: var(--radius-sm);
       font-size: var(--fs-meta);
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
     .severity--danger {
-      background: var(--danger-100);
       color: var(--danger-700);
     }
     .severity--warning {
+      padding: 0 var(--space-2);
       background: var(--warning-100);
       color: var(--warning-700);
     }
     .severity--info {
-      background: var(--info-100);
       color: var(--info-700);
     }
     .body {
@@ -98,15 +100,15 @@ import { SEVERITY_META } from '../quality-ui';
       color: var(--text-secondary);
     }
     .message {
-      font-size: 13px;
+      font-size: var(--fs-small);
     }
     .cta {
       display: inline-flex;
       align-items: center;
       gap: 2px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--green-700);
+      font-size: var(--fs-small);
+      font-weight: var(--fw-body);
+      color: var(--text-primary);
       white-space: nowrap;
     }
     .empty {

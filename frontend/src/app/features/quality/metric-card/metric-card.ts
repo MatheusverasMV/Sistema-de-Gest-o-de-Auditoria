@@ -86,7 +86,7 @@ import {
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       font-size: 11px;
-      font-weight: 500;
+      font-weight: var(--fw-body);
       color: var(--text-secondary);
       white-space: nowrap;
       cursor: help;
@@ -97,14 +97,20 @@ import {
       align-items: center;
       gap: var(--space-2) var(--space-3);
     }
+    /* Situação na linguagem do selo: fundo só para atenção (lima) e crítico (vermelho);
+       sob controle, informativo e coletando ficam em ícone + texto. */
     .status {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 2px var(--space-2);
+      height: 22px;
       border-radius: var(--radius-sm);
       font-size: var(--fs-meta);
-      font-weight: 600;
+      font-weight: var(--fw-strong);
+    }
+    .status--danger,
+    .status--warning {
+      padding: 0 var(--space-2);
     }
     .status--danger {
       background: var(--danger-100);
@@ -114,20 +120,26 @@ import {
       background: var(--warning-100);
       color: var(--warning-700);
     }
-    .status--info {
-      background: var(--info-100);
-      color: var(--info-700);
-    }
+    .status--info,
     .status--success {
-      background: var(--success-100);
       color: var(--success-700);
     }
     .status--neutral {
-      background: var(--neutral-100);
-      color: var(--neutral-700);
+      color: var(--text-secondary);
     }
     .latest {
-      font-size: 13px;
+      display: inline-flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0 4px;
+      font-size: var(--fs-small);
+      color: var(--text-secondary);
+    }
+    .latest strong {
+      font-size: var(--fs-card-title);
+      font-weight: var(--fw-display);
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
     }
     .definition {
       margin: var(--space-2) 0 var(--space-3);
@@ -145,7 +157,7 @@ import {
     }
     .method-note {
       margin-top: var(--space-3);
-      font-size: 13px;
+      font-size: var(--fs-small);
     }
     .method-note summary {
       cursor: pointer;

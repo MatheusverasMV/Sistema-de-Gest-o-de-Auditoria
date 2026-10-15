@@ -17,6 +17,7 @@ export interface ChartPointSelection {
   selector: 'sga-imr-panel',
   imports: [ControlChart, Button],
   template: `
+    <p class="chart-label">Carta I · valores individuais</p>
     <sga-control-chart
       [data]="individuals()"
       [format]="format()"
@@ -47,6 +48,7 @@ export interface ChartPointSelection {
 
     <div [id]="panelId" [hidden]="!expanded()">
       @if (expanded()) {
+        <p class="chart-label chart-label--mr">Carta MR · amplitude móvel</p>
         <p class="mr-intro">
           <strong>Amplitude móvel (MR)</strong> · diferença entre cada observação e a anterior. O
           nível médio pode continuar normal enquanto o processo fica mais irregular; pontos acima do
@@ -83,9 +85,23 @@ export interface ChartPointSelection {
       line-height: 18px;
     }
     .mr-intro {
-      margin: var(--space-3) 0;
-      font-size: 13px;
+      margin: var(--space-1) 0 var(--space-3);
+      font-size: var(--fs-small);
       color: var(--text-secondary);
+    }
+    /* Identifica cada carta do par I-MR (rótulo curto em Light caixa alta). */
+    .chart-label {
+      margin-bottom: var(--space-1);
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-light);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+    .chart-label--mr {
+      margin-top: var(--space-4);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border);
     }
   `,
 })

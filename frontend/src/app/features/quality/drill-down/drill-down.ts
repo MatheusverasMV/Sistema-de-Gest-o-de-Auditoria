@@ -176,21 +176,22 @@ import { SEVERITY_META } from '../quality-ui';
       flex-direction: column;
       gap: var(--space-5);
     }
+    /* Rótulos de seção em Light caixa alta (D2). */
     .section-label {
       margin-bottom: var(--space-2);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
+      font-size: var(--fs-meta);
+      font-weight: var(--fw-light);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
+    /* Sinal sem caixa colorida: fio lateral no tom da severidade + rótulo com ícone e texto. */
     .signal {
       display: flex;
       flex-direction: column;
       gap: var(--space-1);
-      padding: var(--space-3);
-      border-radius: var(--radius-md);
-      border-left: 3px solid currentColor;
+      padding: var(--space-1) 0 var(--space-1) var(--space-3);
+      border-left: 3px solid var(--signal-rule, currentColor);
     }
     .signal + .signal {
       margin-top: var(--space-2);
@@ -199,19 +200,17 @@ import { SEVERITY_META } from '../quality-ui';
       color: var(--text-primary);
     }
     .signal--danger {
-      background: var(--danger-100);
       color: var(--danger-700);
     }
     .signal--warning {
-      background: var(--warning-100);
+      --signal-rule: var(--warning-500);
       color: var(--warning-700);
     }
     .signal--info {
-      background: var(--info-100);
       color: var(--info-700);
     }
     .signal--success {
-      background: var(--success-100);
+      --signal-rule: var(--border-strong);
       color: var(--success-700);
     }
     .signal__badge {
@@ -219,7 +218,7 @@ import { SEVERITY_META } from '../quality-ui';
       align-items: center;
       gap: 6px;
       font-size: var(--fs-meta);
-      font-weight: 600;
+      font-weight: var(--fw-strong);
     }
     .signal strong {
       color: var(--text-primary);
@@ -231,8 +230,7 @@ import { SEVERITY_META } from '../quality-ui';
     }
     .observation__value {
       font-size: 24px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: var(--fw-display);
       font-variant-numeric: tabular-nums;
     }
     .facts {
@@ -240,7 +238,7 @@ import { SEVERITY_META } from '../quality-ui';
       flex-direction: column;
       gap: var(--space-1);
       margin: var(--space-3) 0 0;
-      font-size: 13px;
+      font-size: var(--fs-small);
     }
     .facts div {
       display: flex;
@@ -276,7 +274,7 @@ import { SEVERITY_META } from '../quality-ui';
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--green-700);
+      background: var(--brand);
     }
     .chain li:not(:last-child)::after {
       content: '';
@@ -292,7 +290,7 @@ import { SEVERITY_META } from '../quality-ui';
       color: var(--text-secondary);
     }
     .chain__value {
-      font-weight: 500;
+      font-weight: var(--fw-body);
     }
     .chain__step--historical::before,
     .chain__step--unlinked::before {
@@ -304,8 +302,8 @@ import { SEVERITY_META } from '../quality-ui';
       gap: 2px;
       width: fit-content;
       margin-top: 2px;
-      font-size: 13px;
-      font-weight: 500;
+      font-size: var(--fs-small);
+      font-weight: var(--fw-body);
       color: var(--link);
     }
     .chain__note {
@@ -323,7 +321,7 @@ import { SEVERITY_META } from '../quality-ui';
       padding: var(--space-2) var(--space-3);
       border-radius: var(--radius-md);
       background: var(--surface-muted);
-      font-size: 13px;
+      font-size: var(--fs-small);
       color: var(--text-secondary);
     }
     .unlinked-banner sga-icon {
@@ -354,8 +352,8 @@ import { SEVERITY_META } from '../quality-ui';
       font-variant-numeric: tabular-nums;
     }
     tr.top td {
-      background: var(--green-50);
-      font-weight: 600;
+      background: var(--surface-muted);
+      font-weight: var(--fw-strong);
     }
     .related {
       display: flex;
@@ -379,7 +377,7 @@ import { SEVERITY_META } from '../quality-ui';
     .context {
       padding: var(--space-3);
       border-radius: var(--radius-md);
-      background: var(--surface-sunken);
+      background: var(--surface-muted);
     }
     .context + .meta {
       margin-top: var(--space-1);
