@@ -16,6 +16,9 @@ const MIN_LABEL_SPACING = 52;
 const MIN_VALUE_LABEL_SPACING = 40;
 const LIMIT_LABEL_GAP = 13;
 const TOOLTIP_WIDTH = 260;
+/** Largura mínima legível da carta; abaixo dela a área do gráfico rola na horizontal. */
+const MIN_CHART_WIDTH = 320;
+const TOOLTIP_GAP = 12;
 
 interface PlotPoint extends ControlChartPoint {
   readonly x: number;
@@ -56,11 +59,15 @@ export class ControlChart {
   protected readonly width = signal(720);
   protected readonly margin = MARGIN;
   protected readonly hovered = signal<number | null>(null);
+  /** O espaço disponível é menor que a largura mínima: a carta rola localmente. */
+  protected readonly scrollable = signal(false);
 
   constructor() {
-    const observer = new ResizeObserver(([entry]) =>
-      this.width.set(Math.max(320, Math.floor(entry.contentRect.width))),
-    );
+    const observer = new ResizeObserver(([entry]) => {
+      const available = Math.floor(entry.contentRect.width);
+      this.width.set(Math.max(MIN_CHART_WIDTH, available));
+      this.scrollable.set(available < MIN_CHART_WIDTH);
+    });
     observer.observe(this.host.nativeElement);
     inject(DestroyRef).onDestroy(() => observer.disconnect());
   }
@@ -211,12 +218,19 @@ export class ControlChart {
     return index === null ? null : this.plot()[index];
   });
 
+  /**
+   * Tooltip ao lado do ponto, sem cobrir a coluna de rótulos LSC/LC/LIC à direita: abre para a
+   * direita quando cabe antes dessa coluna; senão, para a esquerda. Sempre dentro da carta.
+   */
   protected readonly tooltipLeft = computed(() => {
     const point = this.active();
     if (!point) {
       return 0;
     }
-    return Math.min(Math.max(point.x - TOOLTIP_WIDTH / 2, 0), this.width() - TOOLTIP_WIDTH);
+    const plotRight = this.width() - MARGIN.right;
+    const right = point.x + TOOLTIP_GAP;
+    const left = right + TOOLTIP_WIDTH <= plotRight ? right : point.x - TOOLTIP_GAP - TOOLTIP_WIDTH;
+    return Math.min(Math.max(left, 0), this.width() - TOOLTIP_WIDTH);
   });
 
   protected readonly hitWidth = computed(() => {

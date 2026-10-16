@@ -98,6 +98,7 @@ li {
 
 .branch-path {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
@@ -114,5 +115,32 @@ li {
 
   .connector {
     display: none;
+  }
+}
+
+// Telas estreitas: todas as etapas visíveis pelo marcador; só a atual mostra o nome (os demais
+// nomes continuam para leitores de tela).
+@media (max-width: 640px) {
+  .steps {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  li {
+    flex: 0 0 auto;
+    padding-right: 0;
+
+    &.current {
+      flex: 1 1 auto;
+    }
+
+    &:not(.current) .label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
   }
 }

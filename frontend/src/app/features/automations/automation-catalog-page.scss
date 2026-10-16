@@ -67,7 +67,8 @@
 
 .catalog {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  // min(100%, 300px): a coluna nunca exige mais que a largura disponível.
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: var(--space-4);
 }
 

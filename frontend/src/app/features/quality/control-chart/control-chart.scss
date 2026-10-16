@@ -7,6 +7,12 @@
   position: relative;
   border-radius: var(--radius-md);
 
+  // Telas estreitas: a carta mantém a largura mínima e rola só aqui, sem overflow da página.
+  &.chart--scroll {
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
   &:focus-visible {
     outline: 2px solid var(--focus-color);
     outline-offset: 4px;
@@ -224,6 +230,15 @@ svg {
   border-top: 1px solid var(--border);
   font-size: 12px;
   color: var(--text-primary);
+}
+
+.scroll-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-1);
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
 }
 
 .legend {

@@ -1,9 +1,10 @@
 <button
   sgaIconButton
   type="button"
-  icon="panel-left"
-  [label]="sidebarCollapsed() ? 'Expandir menu' : 'Recolher menu'"
+  [icon]="mobileNav() ? 'menu' : 'panel-left'"
+  [label]="toggleLabel()"
   [attr.aria-expanded]="!sidebarCollapsed()"
+  aria-controls="main-navigation"
   (click)="toggleSidebar.emit()"
 ></button>
 
@@ -17,7 +18,7 @@
     type="search"
     name="q"
     aria-label="Buscar papéis de trabalho"
-    placeholder="Buscar PTAs, clientes, áreas…"
+    [placeholder]="mobileNav() ? 'Buscar…' : 'Buscar PTAs, clientes, áreas…'"
     [(ngModel)]="query"
   />
 </form>

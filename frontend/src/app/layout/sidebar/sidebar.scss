@@ -21,15 +21,22 @@
 }
 
 // Área da marca: mesma altura da topbar, com o fio inferior alinhado ao dela.
-.brand {
+.brand-bar {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   height: var(--topbar-height);
+  border-bottom: 1px solid var(--sb-rule);
+}
+
+.brand {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  height: 100%;
   // Área de não interferência do logotipo horizontal (≥ 0,79 × altura nas laterais, ≥ 0,61 ×
   // altura acima e abaixo). Os 24 px também alinham o logotipo aos ícones da navegação.
   padding: 0 var(--space-6);
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--sb-rule);
 
   &:hover {
     text-decoration: none;
@@ -51,6 +58,24 @@
 .logo {
   width: 152px;
   height: auto;
+}
+
+// Fechar a gaveta mobile: claro sobre o verde-escuro, foco em lima (o anel padrão não tem
+// contraste aqui).
+.close {
+  margin-right: var(--space-3);
+  color: var(--sb-text);
+
+  &:hover {
+    background: var(--sb-hover);
+    color: var(--text-on-brand);
+  }
+
+  &:focus-visible {
+    box-shadow: none;
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
 }
 
 .symbol {

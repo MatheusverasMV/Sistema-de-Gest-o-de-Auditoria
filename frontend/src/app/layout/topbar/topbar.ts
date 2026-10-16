@@ -42,12 +42,21 @@ export class Topbar {
 
   /** Estado da sidebar, para o rótulo e o aria-expanded do botão que a recolhe. */
   readonly sidebarCollapsed = input(false);
+  /** Abaixo de 768 px o botão abre e fecha a gaveta de navegação (em vez de recolher a sidebar). */
+  readonly mobileNav = input(false);
   readonly toggleSidebar = output<void>();
 
   protected readonly user = this.session.currentUser;
   protected readonly personas = this.session.personas;
   protected readonly roleLabel = roleLabel;
   protected readonly query = signal('');
+  protected readonly toggleLabel = computed(() => {
+    const collapsed = this.sidebarCollapsed();
+    if (this.mobileNav()) {
+      return collapsed ? 'Abrir menu' : 'Fechar menu';
+    }
+    return collapsed ? 'Expandir menu' : 'Recolher menu';
+  });
 
   protected readonly notifications = rxResource({
     stream: () => this.notificationService.list(),

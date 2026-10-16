@@ -84,4 +84,22 @@ describe('Carta de controle — apresentação da Fase 5', () => {
     expect(host.querySelector('.legend .key--signal')).toBeNull();
     expect(host.querySelector('.signal-label--attention')?.textContent?.trim()).toBe('2.8');
   });
+
+  it('tooltip do último ponto abre à esquerda, sem cobrir a coluna de rótulos LSC/LC/LIC', () => {
+    const fixture = TestBed.createComponent(ControlChart);
+    fixture.componentRef.setInput('data', DATA);
+    fixture.componentRef.setInput('format', (v: number) => v.toFixed(1));
+    fixture.componentRef.setInput('label', 'Carta de teste');
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const hits = host.querySelectorAll('rect.hit');
+    hits[hits.length - 1].dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.detectChanges();
+    const tooltip = host.querySelector<HTMLElement>('.tooltip')!;
+    const left = parseFloat(tooltip.style.left);
+    // Largura padrão 720 px; a coluna de rótulos começa em 720 - 84 = 636 px.
+    expect(left).toBeGreaterThanOrEqual(0);
+    expect(left + 260).toBeLessThanOrEqual(636);
+    expect(tooltip.textContent).toContain('9.2');
+  });
 });

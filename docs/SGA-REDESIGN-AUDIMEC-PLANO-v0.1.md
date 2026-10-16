@@ -788,6 +788,63 @@ Nada do que sustenta a leitura estatística é removido: série, LC, LSC/LIC, fa
   - mensagens vazias;
   - ornamento opcional em "Acesso não autorizado" e 404 (a decidir).
 - **Critérios de conclusão:** a checklist da seção 11 completa nas 3 resoluções.
+- **Execução (16/10/2026).** Responsividade, navegação mobile e acabamento. Validado em 320, 390, 768, 1024 e 1440 px. Rotas, permissões, workflow, dados, motor de CEP e serviços sem alteração.
+  - **Navegação mobile (< 768 px).** É a mesma `sga-sidebar` (mesma lista de rotas e regras de acesso), sem duplicação.
+    - **Comportamento.** No App Shell, a sidebar sai do fluxo e vira painel sobreposto (248 px, máximo 85vw), com fundo escurecido.
+    - **Fechamento.** Fecha por Esc, pelo fundo, pelo botão "Fechar menu" e ao concluir uma navegação.
+    - **Foco e fundo.**
+      - Foco preso na gaveta (`FocusTrapFactory` do CDK, o mesmo mecanismo do `sga-drawer`).
+      - Conteúdo de fundo `inert` e rolagem do corpo travada.
+      - Ao fechar, o foco volta ao botão de menu.
+    - **Botão de menu.** "Abrir/Fechar menu", com `aria-expanded` e `aria-controls`.
+    - **Fechada.** Fica fora da tela e com `visibility: hidden`, sem receber foco.
+    - **De 768 px em diante.** Comportamento desktop intacto (recolher/expandir).
+    - O `sga-drawer` não foi reutilizado diretamente: ele é um diálogo que só renderiza o conteúdo quando aberto.
+  - **Causas e correções dos overflows** (nenhum `overflow-x: hidden` global).
+
+    | Página | Causa | Correção |
+    |---|---|---|
+    | Qualidade | largura mínima de 320 px da carta (`ResizeObserver`) | piso mantido; abaixo dele a carta rola só na própria área, com aviso "Deslize a carta…"; cards com laterais de 16 px abaixo de 640 px (em 390 px a carta cabe inteira) |
+    | PTA | grade das exceções `50px 1fr auto auto`; ramificação do fluxo sem quebra; procedimentos com o botão em coluna fixa | abaixo de 640 px: exceções em pilha (ID e valor, descrição, selo); procedimentos em `22px 1fr`; ramificação e títulos de seção quebram linha |
+    | Seleção de Amostras | rótulos do stepper sem espaço; botão "Usar arquivo de demonstração" sem quebra | etapas pelo marcador e o nome só da atual (os demais para leitores de tela); linha do arquivo de exemplo quebra; números do resultado em 2 colunas (1 abaixo de 400 px), sem cortar valores |
+    | Automações | grade do catálogo `minmax(300px, 1fr)` (não eram os chips) | `minmax(min(100%, 300px), 1fr)` |
+    | Dashboard (320 px) | colunas fixas de 140/150 px nas linhas | abaixo de 640 px: título e trabalho numa linha, prioridade e prazo abaixo; barra de progresso na largura toda; o prazo do relatório volta a aparecer |
+
+  - **Overflow horizontal da página, antes → depois.**
+
+    | Página | 390 px | 320 px |
+    |---|---|---|
+    | Qualidade | 43 → 0 | 114 → 0 |
+    | PTA | 19 → 0 | 89 → 0 |
+    | Seleção de Amostras | 15 → 0 | 31 → 0 |
+    | Automações | 2 → 0 | 72 → 0 |
+    | Dashboard | 0 → 0 | 54 → 0 |
+    | Demais páginas | 0 → 0 | 0 → 0 |
+
+    Em 768 px, tudo em 0. Em 1440 e 1024 px, as métricas ficaram idênticas às da Fase 5, sem regressão no desktop.
+  - **Acabamento.**
+    - Tooltip das cartas: abre para a direita só quando cabe antes da coluna LSC/LC/LIC; senão, para a esquerda, sempre dentro da carta.
+    - Busca da topbar com o texto "Buscar…" no mobile.
+    - Menu de notificações limitado à largura da tela.
+    - Dicas de KPI e textos das linhas do Dashboard quebram linha no mobile, em vez de reticências.
+    - Fluxo formal do PTA compacto no mobile, no mesmo padrão do stepper.
+  - **Já estavam adequados.**
+    - Tabelas (`sga-data-table`) e o quadro do Kanban já rolam localmente.
+    - Drawers (PTA, Kanban, Qualidade) já respeitam `max-width: 100vw`, conferido em 320 e 390 px.
+  - **Critérios das fases anteriores atendidos.** Overflow zero em 390 px no PTA (Fase 4) e em Qualidade (Fase 5).
+  - **Testes.** 167, todos aprovados (eram 163).
+    - `app-shell.spec.ts`: desktop preservado; abertura da gaveta com fundo, conteúdo inerte e estado no botão; fechamento por Esc, fundo, botão e rota.
+    - `control-chart.spec.ts`: posição do tooltip.
+    - Foco, persona sem acesso e menus validados no Chrome.
+  - **Pendências institucionais (não resolvidas por esta fase).** O símbolo isolado de duas cores na sidebar recolhida (D3) e no favicon continua **provisório**, até validação da AUDIMEC. As fontes seguem em TTF: a conversão para WOFF2 exigiria ferramenta nova e não foi feita.
+  - **Limitações remanescentes.**
+    - Em 320 px, a carta de controle rola horizontalmente na própria área, de propósito, para não perder legibilidade.
+    - O quadro do Kanban e as tabelas largas rolam localmente, como no desktop.
+    - Os dados seguem demonstrativos.
+
+### Estado final do redesign (16/10/2026)
+
+As Fases 1–6 estão implementadas. Tokens e identidade AUDIMEC, navegação desktop e mobile, componentes compartilhados, páginas operacionais e analíticas, e responsividade de 320 a 1440 px, sem overflow global. Fica em aberto apenas a validação institucional do uso isolado do símbolo (D3 e favicon), que depende da AUDIMEC e não pode ser concluída pelo projeto.
 
 ---
 

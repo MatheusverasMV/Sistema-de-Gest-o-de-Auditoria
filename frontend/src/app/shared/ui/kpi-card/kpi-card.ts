@@ -103,6 +103,12 @@ export type KpiTone = 'neutral' | 'warning' | 'danger';
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    /* Telas estreitas: a dica quebra linha em vez de ser cortada. */
+    @media (max-width: 640px) {
+      .hint {
+        white-space: normal;
+      }
+    }
   `,
 })
 export class KpiCard {

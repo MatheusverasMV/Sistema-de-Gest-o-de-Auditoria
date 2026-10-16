@@ -70,8 +70,9 @@
 
 .block-title {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
   margin-bottom: var(--space-3);
   font-size: var(--fs-card-title);
   font-weight: var(--fw-strong);
@@ -112,6 +113,22 @@
 
   &:first-child {
     border-top: 0;
+  }
+
+  // Telas estreitas: ícone e código na primeira linha; descrição e ação de automação abaixo.
+  @media (max-width: 640px) {
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: var(--space-1) var(--space-3);
+
+    > .proc-text,
+    > a,
+    > .auto-tag {
+      grid-column: 2;
+    }
+
+    > a {
+      justify-self: start;
+    }
   }
 }
 
@@ -156,6 +173,28 @@
 
   &.resolved {
     color: var(--text-secondary);
+  }
+
+  // Telas estreitas: ID e valor numa linha, descrição e selo abaixo.
+  @media (max-width: 640px) {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-1) var(--space-3);
+
+    > :nth-child(2) {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
+
+    > :nth-child(3) {
+      grid-row: 1;
+      grid-column: 2;
+      justify-self: end;
+    }
+
+    > :nth-child(4) {
+      grid-column: 1 / -1;
+      justify-self: start;
+    }
   }
 }
 

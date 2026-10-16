@@ -129,7 +129,7 @@
 }
 
 .notif-menu {
-  width: 360px;
+  width: min(360px, calc(100vw - var(--space-4)));
 }
 
 .notif-item {

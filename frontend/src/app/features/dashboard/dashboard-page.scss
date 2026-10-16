@@ -81,6 +81,51 @@
   grid-template-columns: minmax(0, 1fr) auto 150px;
 }
 
+// Telas estreitas: título e trabalho numa linha própria (quebrando o texto, sem reticências);
+// prioridade e prazo logo abaixo. No progresso, a barra ocupa a largura toda.
+@media (max-width: 640px) {
+  .row {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .engagement-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--space-2);
+
+    .eng-main > * {
+      white-space: normal;
+    }
+
+    .eng-progress {
+      grid-column: 1 / -1;
+    }
+
+    // O prazo do relatório (oculto entre 641 e 1300 px) cabe aqui numa linha própria.
+    .eng-due {
+      display: block;
+      grid-column: 1 / -1;
+      text-align: left;
+    }
+  }
+
+  .exec-main > * {
+    white-space: normal;
+  }
+
+  .task-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: var(--space-2);
+
+    .task-main {
+      grid-column: 1 / -1;
+
+      > * {
+        white-space: normal;
+      }
+    }
+  }
+}
+
 .due {
   display: inline-flex;
   align-items: center;

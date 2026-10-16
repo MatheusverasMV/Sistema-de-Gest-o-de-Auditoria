@@ -1,5 +1,6 @@
 <div
   class="chart"
+  [class.chart--scroll]="scrollable()"
   tabindex="0"
   role="group"
   [attr.aria-label]="
@@ -199,6 +200,12 @@
     </div>
   }
 </div>
+
+@if (scrollable()) {
+  <p class="scroll-hint">
+    <sga-icon name="arrow-right" [size]="12" />Deslize a carta para ver todos os períodos e limites.
+  </p>
+}
 
 <div class="legend" aria-hidden="true">
   <span><i class="key key--series"></i>Valor observado</span>

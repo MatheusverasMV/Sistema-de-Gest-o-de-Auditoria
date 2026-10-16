@@ -72,6 +72,14 @@ import { Component, input } from '@angular/core';
     .card__body--flush:first-child {
       padding-top: 0;
     }
+    /* Telas estreitas: laterais de 16 px, para o conteúdo (ex.: cartas) ganhar largura útil. */
+    @media (max-width: 640px) {
+      .card__header,
+      .card__body:not(.card__body--flush) {
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+      }
+    }
   `,
 })
 export class Card {
